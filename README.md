@@ -19,7 +19,13 @@ Link-zum-Wiki
 
 ---
 
-## Technik
+## Dokumentation
+
+[Wiki](https://bitbucket.org/tudresden/ws2020-gruppe10/wiki/Home)
+
+---
+
+## Voraussetzungen
 
 python:
 
