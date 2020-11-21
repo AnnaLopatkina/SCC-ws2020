@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
-from wtforms.validators import ValidationError, Email, EqualTo, DataRequired
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, IntegerField, HiddenField
+from wtforms.validators import ValidationError, Email, EqualTo, DataRequired, NumberRange
 from clientManager.entities import User
 
 
@@ -24,3 +24,11 @@ class ProfileForm(FlaskForm):
     email = StringField('email', validators=[DataRequired()])
     studies = SelectField('studies', choices=[], validate_choice=False)
     editprofile = SubmitField('editprofile')
+
+
+class StudyForm(FlaskForm):
+    studyid = HiddenField()
+    title = StringField('title', validators=[DataRequired()])
+    semesters = IntegerField('semesters', validators=[DataRequired(), NumberRange(min=1, max=20, message="enter valid number of semesters")], default=6)
+    description = TextAreaField('description')
+    save = SubmitField('save')
