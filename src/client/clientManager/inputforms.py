@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
 from wtforms.validators import ValidationError, Email, EqualTo, DataRequired
 from clientManager.entities import User
 
@@ -18,3 +18,9 @@ class LoginForm(FlaskForm):
     password = PasswordField('password', validators=[DataRequired()])
     login = SubmitField('login')
 
+
+class ProfileForm(FlaskForm):
+    name = StringField('name', validators=[DataRequired()])
+    email = StringField('email', validators=[DataRequired()])
+    studies = SelectField('studies', choices=[], validate_choice=False)
+    editprofile = SubmitField('editprofile')

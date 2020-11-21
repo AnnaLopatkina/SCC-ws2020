@@ -120,23 +120,24 @@
             <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
                 <div class="card card-signin my-5">
                     <div class="card-body">
-                        <h5 class="card-title text-center">show profile</h5>
+                        <h5 class="card-title text-center">edit profile</h5>
                         <form class="form-signin" action="" method="post">
+                            {{ form.hidden_tag() }}
                             <div class="form-label-group">
-                                <input class="form-control" value="{{ user.username }}" disabled>
+                                {{ form.name(class="form-control", placeholder="Enter name", type="text", required="true", autofocus="true") }}
+                                {{ form.name.label }}
                             </div>
                             <div class="form-label-group">
-                                <input class="form-control" value="{{ user.email }}" disabled>
+                                {{ form.email(class="form-control", placeholder="Enter E-Mail address", type="email", required="true", autofocus="true") }}
+                                {{ form.email.label }}
                             </div>
 
                             <div class="form-label-group">
-
-                            </div>
-                            <div class="form-label-group">
-                                {{study.title}}
+                                {{ form.studies(class="form-control") }}
                             </div>
 
                             <hr class="my-4">
+                            {{ form.editprofile(class="btn btn-lg btn-primary btn-block text-uppercase") }}
                         </form>
                     </div>
                 </div>
