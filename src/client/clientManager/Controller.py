@@ -9,6 +9,11 @@ import requests
 
 service_ip = "localhost"
 service_port = "5000"
+
+# API Version when working with real service
+# api_version= "api"
+
+api_version = "test/api"
 headers = {
     "Accept-Encoding": "gzip",
     "User-Agent": "Web-Client"
@@ -130,7 +135,40 @@ def logout():
 @login_required
 def studies_admin():
     r = getstudies()
+    print(r.json()['studies'])
     return render_template("studies_admin.html", studies=r.json()['studies'])
+
+
+@app.route("/editStudy/<int:studyid>", methods=['GET'])
+@login_required
+def studies_edit_admin(studyid):
+    r = getstudies()
+
+    study = r.json()['studies'][studyid]
+    form = StudyForm(studyid=studyid, title=study['title'], description=study['description'])
+
+    return render_template('study_admin_edit.html', form=form)
+
+
+@app.route("/editStudy/<int:studyid>", methods=['POST'])
+@login_required
+def studies_edit_admin_post(studyid):
+    form = StudyForm()
+
+    if form.validate_on_submit():
+        study = {
+            "id": form.studyid.data,
+            "title": form.title.data,
+            "description": form.description.data
+        }
+
+        url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
+
+        r = requests.put(url=url, headers=headers, json=study)
+        if r.status_code != 200:
+            print("request failed with status: {}".format(r.status_code))
+
+    return redirect(url_for('studies_admin'))
 
 
 @app.route("/addStudy", methods=['GET'])
@@ -148,11 +186,12 @@ def studies_save_admin():
     if form.validate_on_submit():
         study={
             "id": form.studyid.data,
-            "title": form.title.data
+            "title": form.title.data,
+            "description": form.description.data
         }
         print("send study: {}".format(study))
 
-        url = "http://{}:{}/test/api/study".format(service_ip, service_port)
+        url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
 
         r = requests.put(url=url, headers=headers, json=study)
         if r.status_code != 200:
@@ -164,15 +203,18 @@ def studies_save_admin():
 studies = [
     {
         "id": "1",
-        "title": "Bachelor Informatik"
+        "title": "Bachelor Informatik",
+        "description": "Ein toller Studiengang"
     },
     {
         "id": "2",
-        "title": "Diplom Informatik"
+        "title": "Diplom Informatik",
+        "description": "Das musst du studieren!"
     },
     {
         "id": "3",
-        "title": "Master Informatik"
+        "title": "Master Informatik",
+        "description": "Das kommt danach"
     }
 ]
 
@@ -190,7 +232,7 @@ def testapi(study_id):
 
 
 def getstudies():
-    url = "http://{}:{}/test/api/studies".format(service_ip, service_port)
+    url = "http://{}:{}/{}/studies".format(service_ip, service_port, api_version)
     r = requests.get(url=url, headers=headers)
     if r.status_code != 200:
         print("request failed with status: {}".format(r.status_code))
@@ -204,7 +246,7 @@ def savestudy():
         abort(400)
 
     if request.json["id"]:
-        studyid = request.json["id"]
+        studyid = int(request.json["id"])
     elif len(studies) != 0:
         studyid = int(studies[-1]["id"]) + 1
     else:
@@ -212,10 +254,14 @@ def savestudy():
 
     study = {
         "id": studyid,
-        "title": request.json["title"]
+        "title": request.json["title"],
+        "description": request.json["description"]
     }
 
+    # remove entry with studyid
+    studies[:] = [d for d in studies if d.get('id') != studyid]
     studies.append(study)
+    
     print(studies)
     print(studyid-1)
 
