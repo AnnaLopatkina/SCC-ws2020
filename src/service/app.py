@@ -1,12 +1,4 @@
-from flask import Flask
-
-app = Flask(__name__)
-
-
-@app.route('/api/token')
-def hello_world():
-    return 'Hello World!'
-
+from serviceManager import app
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
