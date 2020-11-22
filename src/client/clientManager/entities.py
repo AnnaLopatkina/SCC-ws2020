@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from clientManager import db, login
+from clientManager import db, loginmanager
 
 
 class Study(db.Model):
@@ -48,11 +48,29 @@ class User(UserMixin, db.Model):
     def get_study(self):
         return self.study
 
+    def is_authenticated(self):
+        return True
+
+    def set_role(self, role):
+        self.roles.append(role)
+
+    def is_admin(self):
+        for role in self.roles:
+            if role.name == "Admin":
+                return True
+        return False
+
+    def has_role(self, rolestring):
+        for role in self.roles:
+            if role.name == rolestring:
+                return True
+        return False
+
     @classmethod
     def users_full(cls):
         return User.query.join(Study).all()
 
 
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+@loginmanager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)

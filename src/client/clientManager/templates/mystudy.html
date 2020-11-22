@@ -1,6 +1,19 @@
 {% extends 'base_layout.html' %}
 
 {% block content %}
+
+
+    {% if error %}
+        <div class="jumbotron">
+            <div class="container">
+                <h2>Bitte lege zuerst deinen Studiengang und Semester fest:</h2>
+            </div>
+            <a class="btn btn-info" href="/profile">Profil bearbeiten</a>
+        </div>
+    {% endif %}
+
+    {% if not error %}
+
     <div class="jumbotron">
         <div class="container">
             <h1>Mein Studium</h1>
@@ -35,4 +48,5 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
 {% endblock %}

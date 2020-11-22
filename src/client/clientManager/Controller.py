@@ -1,9 +1,9 @@
 from flask import render_template, redirect, url_for, flash, session, request, jsonify, abort
-from flask_login import login_required, current_user, login_user, logout_user
-from sqlalchemy.orm import query
+from flask_login import current_user, login_user, logout_user, login_required
+from functools import wraps
 
-from clientManager.entities import User, Study
-from clientManager import app, db
+from clientManager.entities import User, Study, Role
+from clientManager import app, db, loginmanager
 from clientManager.inputforms import LoginForm, RegistrationForm, ProfileForm, StudyForm
 import requests
 
@@ -19,6 +19,35 @@ headers = {
     "Accept-Encoding": "gzip",
     "User-Agent": "Web-Client"
 }
+
+
+def admin_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+
+        for role in current_user.roles:
+            if role.name == "Admin":
+                return f(*args, **kwargs)
+        else:
+            flash("You need to be an admin to view this page.")
+            return redirect(url_for('index'))
+
+    return wrap
+
+
+def login_required_and_roles(role="ANY"):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated():
+                return loginmanager.unauthorized()
+            if not (current_user.has_role(role)) and (role != "ANY"):
+                return loginmanager.unauthorized()
+            return fn(*args, **kwargs)
+
+        return decorated_view
+
+    return wrapper
 
 
 @app.route('/')
@@ -66,6 +95,7 @@ def register_post():
     if form.validate_on_submit():
         user = User(username=form.name.data, email=form.email.data)
         user.set_password(form.password.data)
+        user = add_role_user(user, "STUDENT")
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -153,7 +183,7 @@ def logout():
 
 
 @app.route("/users")
-@login_required
+@login_required_and_roles(role="Admin")
 def users_admin():
     data = db.session.query(User, Study).join(Study).all()
     for user, study in data:
@@ -279,10 +309,44 @@ def studies_save_admin():
 def mystudy():
     data = db.session.query(Study).join(User).filter(User.email == current_user.email).first()
 
+    if data is None:
+        return render_template("mystudy.html", error=True)
+
     r = getstudy(data.id)
     print(r.json())
 
     return render_template("mystudy.html", study=r.json(), user=current_user)
+
+
+@app.route("/addrole")
+def addrole():
+    user = User.query.filter_by(email=current_user.email).first()
+    add_role("Admin", user)
+    user = User.query.filter_by(email=current_user.email).first()
+    for role in user.roles:
+        print(role.name)
+    return redirect(url_for('index'))
+
+
+def add_role(rolestring, user):
+    user = add_role_user(user, rolestring)
+    db.session.add(user)
+    db.session.commit()
+
+
+def add_role_user(user, rolestring):
+    role = Role.query.filter_by(name=rolestring).first()
+    print(role)
+    if role is None:
+        print("create new Role {}".format(rolestring))
+        role = Role()
+        role.name = rolestring
+        db.session.add(role)
+
+    print("add role to user")
+    user.roles.append(role)
+    return user
+
 
 
 def getstudies():

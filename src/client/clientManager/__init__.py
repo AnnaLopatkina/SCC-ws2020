@@ -1,17 +1,21 @@
+from functools import wraps
+
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+from flask_user import UserManager
 
 import os
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
+                                        'sqlite:///' + os.path.join(basedir, 'app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'dsuiafohu0o437tzghsrodinzt478oemsfuhidohsguieo'
 db = SQLAlchemy(app)
-login = LoginManager(app)
+loginmanager = LoginManager(app)
 
 import clientManager.Controller
 import clientManager.api_controller
