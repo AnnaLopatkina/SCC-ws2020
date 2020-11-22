@@ -275,6 +275,16 @@ def studies_save_admin():
     return redirect(url_for('studies_admin'))
 
 
+@app.route("/myStudy", methods=['GET'])
+def mystudy():
+    data = db.session.query(Study).join(User).filter(User.email == current_user.email).first()
+
+    r = getstudy(data.id)
+    print(r.json())
+
+    return render_template("mystudy.html", study=r.json(), user=current_user)
+
+
 def getstudies():
     url = "http://{}:{}/{}/studies".format(service_ip, service_port, api_version)
     r = requests.get(url=url, headers=headers)
@@ -284,3 +294,9 @@ def getstudies():
     return r
 
 
+def getstudy(studyid):
+    url = "http://{}:{}/{}/study/{}".format(service_ip, service_port, api_version, studyid)
+    r = requests.get(url=url, headers=headers)
+    if r.status_code != 200:
+        print("request failed with status: {}".format(r.status_code))
+    return r

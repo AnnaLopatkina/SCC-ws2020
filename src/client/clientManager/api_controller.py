@@ -5,17 +5,20 @@ studies = [
     {
         "id": "1",
         "title": "Bachelor Informatik",
-        "description": "Ein toller Studiengang"
+        "description": "Ein toller Studiengang",
+        "semesters": "6",
     },
     {
         "id": "2",
         "title": "Diplom Informatik",
-        "description": "Das musst du studieren!"
+        "description": "Das musst du studieren!",
+        "semesters": "10",
     },
     {
         "id": "3",
         "title": "Master Informatik",
-        "description": "Das kommt danach"
+        "description": "Das kommt danach",
+        "semesters": "4",
     }
 ]
 
@@ -25,11 +28,6 @@ def testapi1():
     return jsonify({
         "studies": studies
     })
-
-
-@app.route('/test/api/study/<int:study_id>', methods=['GET'])
-def testapi(study_id):
-    return jsonify({"id": "1", "title": "Bachelor Informatik"})
 
 
 @app.route('/test/api/study', methods=['PUT'])
@@ -58,3 +56,56 @@ def savestudy():
     print(studyid - 1)
 
     return jsonify(studies[studyid - 1])
+
+
+study = {
+    "id": "1",
+    "title": "Bachelor Informatik",
+    "semesters": "6",
+    "modules": [
+        {
+            "id": "1",
+            "title": "Mathematik für Informatiker 1",
+            "semester": "1",
+            "lectures": [
+                {
+                    "id": "1",
+                    "title": "Lineare Algebra",
+                    "semester": "1",
+                    "responsible": "Prof Baumann"
+                },
+                {
+                    "id": "2",
+                    "title": "Diskrete Strukturen",
+                    "semester": "1",
+                    "responsible": "Prof Bodirsky"
+                }
+            ]
+        },
+        {
+            "id": "2",
+            "title": "Rechnerarchitektur",
+            "semester": "1",
+            "lectures": [
+                {
+                    "id": "1",
+                    "title": "Rechnerarchitektur 1",
+                    "semester": "3",
+                    "responsible": "Prof Baumann"
+                },
+                {
+                    "id": "2",
+                    "title": "Rechnerarchitektur 2",
+                    "semester": "4",
+                    "responsible": "Prof Bodirsky"
+                }
+            ]
+        }
+    ]
+}
+
+
+@app.route('/test/api/study/<int:studyid>', methods=['GET'])
+def getstudy(studyid):
+    print("endpoint getstudy with id {}".format(studyid))
+    return jsonify({"study": study})

@@ -1,0 +1,38 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Mein Studium</h1>
+            <p>{{ study["study"].title }} <br>
+            {{ user.semester }}. Semester</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+
+            {% for module in study["study"]["modules"] %}
+            <div class="col-md-12">
+                <a class="btn col-md-12 border" role="button" data-toggle="collapse" href="#toggle{{ module.id }}" aria-expanded="false" aria-controls="toggle{{ module.id }}">
+                    <p class="float-left">{{ module.id }}</p>
+                    <p class="float-right">{{ module.id }}</p>
+                    <h2>{{ module.title }}</h2>
+                </a>
+                <div class="collapse" id="toggle{{ module.id }}">
+                  <div class="card card-body">
+                      {% for lecture in module["lectures"] %}
+                      <div class="col-md-12 border card">
+                        <h4>{{ lecture.title }}</h4>
+                        <p>Semester: {{ lecture.semester }} <br> Verantwortlich: {{ lecture.responsible }}
+                        </p>
+                      </div>
+                      {% endfor %}
+                      <a class="btn btn-default" href="/editUser/{{ module.id }}">Edit</a>
+                  </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
