@@ -6,6 +6,7 @@ from clientManager import db, login
 class Study(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(300), nullable=False)
+    semesters = db.Column(db.Integer(), primary_key=False)
 
 
 class Role(db.Model):
@@ -21,9 +22,10 @@ class UserRoles(db.Model):
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(99), unique=True, nullable=False)
+    username = db.Column(db.String(99), nullable=False)
     email = db.Column(db.String(99), unique=True, nullable=False)
     password_hash = db.Column((db.String(250)))
+    semester = db.Column(db.Integer(), primary_key=False)
     roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
     study = db.Column(db.Integer, db.ForeignKey('study.id'))
 
@@ -45,6 +47,10 @@ class User(UserMixin, db.Model):
 
     def get_study(self):
         return self.study
+
+    @classmethod
+    def users_full(cls):
+        return User.query.join(Study).all()
 
 
 @login.user_loader

@@ -1,34 +1,70 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, IntegerField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, IntegerField, \
+    HiddenField, validators
 from wtforms.validators import ValidationError, Email, EqualTo, DataRequired, NumberRange
 from clientManager.entities import User
 
 
 class RegistrationForm(FlaskForm):
-    name = StringField('name', validators=[DataRequired()])
-    email = StringField('email', validators=[DataRequired()])
-    password = PasswordField('password', validators=[DataRequired()])
-    password2 = PasswordField('password2', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('EMail', validators=[DataRequired(), Email()])
+    password = PasswordField('Passwort', validators=[DataRequired()])
+    password2 = PasswordField('Passwort wiederholen', validators=[DataRequired(), EqualTo('password', message="Passwörter müssen gleich sein!")])
     terms = BooleanField('terms')
     register = SubmitField('register')
 
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError('Verwendung dieser EMail ist nicht möglich!')
+
+    def validate_password(self, password):
+        if password == "":
+            raise ValidationError("Passwort darf nicht leer sein!")
+
 
 class LoginForm(FlaskForm):
-    email = StringField('email', validators=[DataRequired()])
+    email = StringField('email', validators=[DataRequired(), Email()])
     password = PasswordField('password', validators=[DataRequired()])
     login = SubmitField('login')
 
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError("E-Mail oder Passwort ist falsch!")
+
+    def validate_password(self, password):
+        user = User.query.filter_by(email=self.email.data).first()
+        if user is None:
+            raise ValidationError("E-Mail oder Passwort ist falsch!")
+        elif not user.check_password(password.data):
+            raise ValidationError("E-Mail oder Passwort ist falsch!")
+
 
 class ProfileForm(FlaskForm):
-    name = StringField('name', validators=[DataRequired()])
-    email = StringField('email', validators=[DataRequired()])
-    studies = SelectField('studies', choices=[], validate_choice=False)
-    editprofile = SubmitField('editprofile')
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    studies = SelectField('Studiengang', choices=[], validate_choice=False)
+    semester = IntegerField('Semester', validators=[validators.NumberRange(min=1, max=30, message="Semester unrealistisch")], default=1)
+    passwordold = PasswordField('Altes Passwort', validators=[])
+    password = PasswordField('Neues Passwort', validators=[])
+    password2 = PasswordField('Neues Passwort Wiederholen', validators=[validators.EqualTo('password', message='Passwörter nicht gleich')])
+    editprofile = SubmitField('Profil speichern')
+
+    def validate_passwordold(self, passwordold):
+        if passwordold.data != "":
+            user = User.query.filter_by(email=self.email.data).first()
+            if not user.check_password(passwordold.data):
+                raise ValidationError('Passwort falsch')
+
+    def validate_password(self, password):
+        if self.passwordold.data != "" and password.data == "":
+            raise ValidationError('Neues Passwort darf nicht leer sein!')
 
 
 class StudyForm(FlaskForm):
     studyid = HiddenField()
-    title = StringField('title', validators=[DataRequired()])
-    semesters = IntegerField('semesters', validators=[DataRequired(), NumberRange(min=1, max=20, message="enter valid number of semesters")], default=6)
-    description = TextAreaField('description')
+    title = StringField('Studiengang', validators=[DataRequired()])
+    semesters = IntegerField('Anzahl Semester', validators=[DataRequired(), NumberRange(min=1, max=20, message="enter valid number of semesters")], default=6)
+    description = TextAreaField('Beschreibung')
     save = SubmitField('save')

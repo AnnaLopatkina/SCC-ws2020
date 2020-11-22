@@ -151,29 +151,21 @@
                         <form class="form-signin" action="" method="post">
                             {{ form.hidden_tag() }}
                             <div class="form-label-group">
-                                <!--<input type="email" id="inputEmail" class="form-control" placeholder="Email address"
-                                       required autofocus>
-                                <label for="inputEmail">Email address</label>
-                                <br>
-                                <br>-->
                                 {{ form.email(class="form-control", placeholder="Enter E-Mail address", type="email", required="true", autofocus="true") }}
                                 {{ form.email.label }}
                             </div>
 
                             <div class="form-label-group">
-                                <!--<input type="password" id="inputPassword" class="form-control" placeholder="Password"
-                                       required>
-                                <label for="inputPassword">Password</label>-->
                                 {{ form.password(class="form-control", placeholder="email", required="true", autofocus="true") }}
                                 {{ form.password.label }}
                             </div>
 
-                            <!--<div class="custom-control custom-checkbox mb-3">
-                                <input type="checkbox" class="custom-control-input" id="customCheck1">
-                                <label class="custom-control-label" for="customCheck1">Remember password</label>
-                            </div>-->
-                            <!--<button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Sign in
-                            </button>-->
+                            {% for error in form.password.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                                </div>
+                            {% endfor %}
+
                             {{ form.login(class="btn btn-lg btn-primary btn-block text-uppercase") }}
                             <hr class="my-4">
                         </form>
