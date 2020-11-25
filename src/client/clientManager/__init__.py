@@ -3,7 +3,6 @@ from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_login import LoginManager, current_user
-from flask_user import UserManager
 
 import os
 
