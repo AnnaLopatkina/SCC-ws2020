@@ -1,6 +1,8 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from clientManager import db, loginmanager
+from flask_sqlalchemy import event
+from clientManager.config import admin_email, admin_password, admin_username
 
 
 class Study(db.Model):
@@ -12,6 +14,9 @@ class Study(db.Model):
 class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
+
+    def __repr__(self):
+        return self.name
 
 
 class UserRoles(db.Model):
@@ -54,9 +59,20 @@ class User(UserMixin, db.Model):
     def set_role(self, role):
         self.roles.append(role)
 
+    def get_roles(self):
+        return self.roles
+
+    def get_role_string(self):
+        rolestring = ""
+        for role in self.get_roles():
+            if rolestring != "":
+                rolestring += ', '
+            rolestring += role.name
+        return rolestring
+
     def is_admin(self):
         for role in self.roles:
-            if role.name == "Admin":
+            if role.name == "ADMIN":
                 return True
         return False
 
@@ -69,6 +85,40 @@ class User(UserMixin, db.Model):
     @classmethod
     def users_full(cls):
         return User.query.join(Study).all()
+
+
+@event.listens_for(User.__table__, 'after_create')
+def create_admin_and_roles(*args, **kwargs):
+    print("init admin user & roles")
+
+    admin = User(admin_username, admin_email)
+    admin.set_password(admin_password)
+
+    db.session.add(admin)
+    db.session.commit()
+
+
+@event.listens_for(Role.__table__, 'after_create')
+def create_roles(*args, **kwargs):
+    admin_role = Role()
+    admin_role.name = "ADMIN"
+
+    student_role = Role()
+    student_role.name = "STUDENT"
+
+    db.session.add(admin_role)
+    db.session.add(student_role)
+    db.session.commit()
+
+
+@event.listens_for(UserRoles.__table__, 'after_create')
+def admin_role(*args, **kwargs):
+    admin_r = Role.query.filter_by(name="ADMIN").first()
+    admin = User.query.filter_by(email=admin_email).first()
+    admin.set_role(admin_r)
+
+    db.session.add(admin)
+    db.session.commit()
 
 
 @loginmanager.user_loader

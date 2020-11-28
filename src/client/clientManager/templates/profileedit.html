@@ -178,6 +178,25 @@
 
                             <hr class="my-4">
 
+                            <h5>Rollen</h5>
+
+                            <div class="form-label-group">
+                                {% if current_user.has_role("ADMIN") %}
+                                    {{ form.roles(class="form-control") }}
+                                {% else %}
+                                    {{ form.roles(class="form-control", disabled="disabled") }}
+                                {% endif %}
+                                {% for error in form.roles.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5>Mein Studium</h5>
+
                             <div class="form-label-group">
                                 {{ form.studies(class="form-control") }}
                                 {% for error in form.studies.errors %}

@@ -28,7 +28,7 @@
                     </div>
                 </li>
 
-            {% if session['logged_in'] == True and current_user.is_admin() %}
+            {% if session['logged_in'] == True and current_user.has_role("ADMIN") %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -36,7 +36,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/studiesAdmin">Studiengang</a>
-                        <a class="dropdown-item" href="#">Rollen</a>
+                        <a class="dropdown-item" href="/roles">Rollen</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="/users">Nutzer</a>
                     </div>

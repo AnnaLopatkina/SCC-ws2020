@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, IntegerField, \
     HiddenField, validators
 from wtforms.validators import ValidationError, Email, EqualTo, DataRequired, NumberRange
-from clientManager.entities import User
+from clientManager.entities import User, Role
 
 
 class RegistrationForm(FlaskForm):
@@ -44,6 +44,7 @@ class LoginForm(FlaskForm):
 class ProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
+    roles = SelectField('Rollen', choices=[], validate_choice=False)
     studies = SelectField('Studiengang', choices=[], validate_choice=False)
     semester = IntegerField('Semester', validators=[validators.NumberRange(min=1, max=30, message="Semester unrealistisch")], default=1)
     passwordold = PasswordField('Altes Passwort', validators=[])
@@ -68,3 +69,17 @@ class StudyForm(FlaskForm):
     semesters = IntegerField('Anzahl Semester', validators=[DataRequired(), NumberRange(min=1, max=20, message="enter valid number of semesters")], default=6)
     description = TextAreaField('Beschreibung')
     save = SubmitField('save')
+
+
+class RoleForm(FlaskForm):
+    roleid = HiddenField()
+    name = StringField('Rolle im System', validators=[DataRequired()])
+    save = SubmitField('Rolle speichern')
+
+    def validate_name(self, name):
+        if name == "":
+            raise ValidationError('Rollenname darf nicht leer sein!')
+        else:
+            for role in Role.query.all():
+                if role.name == name:
+                    raise ValidationError('Eine Rolle {} existiert bereits!'.format(name))

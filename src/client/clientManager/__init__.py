@@ -17,6 +17,7 @@ db = SQLAlchemy(app)
 loginmanager = LoginManager(app)
 
 import clientManager.Controller
+import clientManager.usercontroller
 import clientManager.api_controller
 
 db.create_all()

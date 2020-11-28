@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 
+import serviceManager.Controller
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
