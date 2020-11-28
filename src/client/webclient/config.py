@@ -2,9 +2,9 @@ service_ip = "localhost"
 service_port = "2000"
 
 # API Version when working with real service
-# api_version = "api"
+api_version = "api"
 
-api_version = "test/api"
+# api_version = "test/api"
 
 headers = {
     "Accept-Encoding": "gzip",
