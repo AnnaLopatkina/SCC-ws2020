@@ -77,6 +77,8 @@ study = {
                 {
                     "id": "1",
                     "title": "Lineare Algebra",
+                    "short": "",
+                    "description": "",
                     "semester": "1",
                     "responsible": "Prof Baumann"
                 },
@@ -84,6 +86,8 @@ study = {
                     "id": "2",
                     "title": "Diskrete Strukturen",
                     "semester": "1",
+                    "short": "",
+                    "description": "",
                     "responsible": "Prof Bodirsky"
                 }
             ]

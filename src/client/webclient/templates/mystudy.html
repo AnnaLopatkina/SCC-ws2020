@@ -26,7 +26,7 @@
             <div class="row">
 
                 {% for module in study["study"]["modules"] %}
-                    <div class="col-md-12">
+                    <div class="col-md-12 m-2">
                         <a class="btn col-md-12 border" role="button" data-toggle="collapse"
                            href="#toggle{{ module.id }}" aria-expanded="false" aria-controls="toggle{{ module.id }}">
                             <p class="float-left">{{ module.id }}</p>
@@ -36,14 +36,13 @@
                         <div class="collapse" id="toggle{{ module.id }}">
                             <div class="card card-body">
                                 {% for lecture in module["lectures"] %}
-                                    <div class="col-md-12 border card">
+                                    <div class="col-md-12 border card p-1 m-1">
                                         <h4>{{ lecture.title }}</h4>
                                         <p>Semester: {{ lecture.semester }} <br>
                                             Verantwortlich: {{ lecture.responsible }}
                                         </p>
                                     </div>
                                 {% endfor %}
-                                <a class="btn btn-default" href="/editUser/{{ module.id }}">Edit</a>
                             </div>
                         </div>
                     </div>

@@ -239,7 +239,7 @@ def add_lecture_post(studyid, moduleid):
         if r.status_code != 200:
             print("request failed with status: {}".format(r.status_code))
 
-        return redirect(url_for('studies_admin'))
+        return redirect(url_for('study_admin'))
 
     return render_template("editLecture.html", form=form, title="Modul erstellen", study=study.json(), moduleid=moduleid)
 
@@ -290,6 +290,6 @@ def edit_lecture_post(studyid, moduleid, lectureid):
 
         # add api put request here
 
-        return redirect(url_for('studies_admin'))
+        return redirect(url_for('study_admin'))
 
     return render_template("editLecture.html", form=form, title="Lehrveranstaltung bearbeiten", study=study.json(), moduleid=moduleid)
