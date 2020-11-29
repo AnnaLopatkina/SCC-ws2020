@@ -67,7 +67,12 @@ study = {
         {
             "id": "1",
             "title": "Mathematik für Informatiker 1",
-            "semester": "1",
+            "short": "INF-110",
+            "duration": "2",
+            "credits": "15",
+            "description": "some text",
+            "responsible": "Dr. Prof.",
+            "teaching": "4/2/0",
             "lectures": [
                 {
                     "id": "1",

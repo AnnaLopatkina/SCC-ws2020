@@ -12,3 +12,15 @@ class StudyForm(FlaskForm):
                              default=6)
     description = TextAreaField('Beschreibung')
     save = SubmitField('save')
+
+
+class ModuleForm(FlaskForm):
+    moduleid = HiddenField()
+    title = StringField('Modulname', validators=[DataRequired()])
+    short = StringField('Modulkürzel', validators=[DataRequired()])
+    description = TextAreaField('Modulbeschreibung')
+    duration = StringField('Dauer des Moduls')
+    credits = StringField('Leistungspunkte')
+    responsible = StringField('Verantwortlicher Dozent')
+    teaching = StringField('Lehrform: x/x/x SWS')
+    save = SubmitField('Modul erstellen')
