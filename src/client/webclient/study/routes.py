@@ -4,10 +4,10 @@ from flask_login import current_user, login_required
 
 from webclient import app, db
 from webclient.config import *
-from webclient.study.studymanagement import getstudies, getstudy
-from webclient.study.forms import StudyForm, ModuleForm
-from webclient.user.models import User
+from webclient.study.forms import StudyForm, ModuleForm, LectureForm
 from webclient.study.models import Study
+from webclient.study.studymanagement import getstudies, getstudy
+from webclient.user.models import User
 from webclient.user.usermanagement import login_required_and_roles
 
 
@@ -136,7 +136,7 @@ def add_module_post(studyid):
 
         return redirect(url_for('studies_admin'))
 
-    return render_template("editModule.html", form = form, title="Modul erstellen", study=study.json())
+    return render_template("editModule.html", form=form, title="Modul erstellen", study=study.json())
 
 
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['GET'])
@@ -160,7 +160,6 @@ def edit_module(studyid, moduleid):
             form.credits.data = module['credits']
             form.responsible.data = module['responsible']
             form.teaching.data = module['teaching']
-
 
     return render_template("editModule.html", form=form, title="Modul erstellen", study=study.json())
 
@@ -191,26 +190,106 @@ def edit_module_post(studyid, moduleid):
     return render_template("editModule.html", form=form, title="Modul erstellen", study=study.json())
 
 
+@app.route("/study/<int:studyid>")
+@login_required_and_roles(role="ADMIN")
+def study_admin(studyid):
+    study = getstudy(studyid)
+
+    return render_template("study_admin.html", study=study.json())
 
 
+# Lehrveranstaltungen verwalten
+
+@app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['GET'])
+@login_required_and_roles(role="ADMIN")
+def add_lecture(studyid, moduleid):
+    study = getstudy(studyid)
+    form = LectureForm()
+
+    return render_template("editLecture.html", form=form, title="Modul erstellen", study=study.json(), moduleid=moduleid)
 
 
+@app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['POST'])
+@login_required_and_roles(role="ADMIN")
+def add_lecture_post(studyid, moduleid):
+    form = LectureForm()
+    study = getstudy(studyid)
+
+    print(form.validate())
+    print(form.errors)
+
+    if form.validate_on_submit():
+        lecture = {
+            "moduleid": moduleid,
+            "id": "",
+            "title": form.title.data,
+            "short": form.short.data,
+            "description": form.description.data,
+            "semester": form.semester.data,
+            "responsible": form.responsible.data,
+        }
+
+        # add api put request here
+        print(lecture)
+
+        url = "http://{}:{}/{}/study/{}/module/{}/lecture".format(service_ip, service_port, api_version, studyid,
+                                                                  moduleid)
+
+        r = requests.put(url=url, headers=headers, json=lecture)
+        if r.status_code != 200:
+            print("request failed with status: {}".format(r.status_code))
+
+        return redirect(url_for('studies_admin'))
+
+    return render_template("editLecture.html", form=form, title="Modul erstellen", study=study.json(), moduleid=moduleid)
 
 
+@app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['GET'])
+@login_required_and_roles(role="ADMIN")
+def edit_lecture(studyid, moduleid, lectureid):
+    study = getstudy(studyid)
+    form = LectureForm()
+
+    studyjson = study.json()
+    print(studyjson)
+
+    for module in study.json()['study']["modules"]:
+        print("check module id {} if it equals {} ? {}".format(module['id'], moduleid, int(module['id']) == moduleid))
+        if int(module['id']) == moduleid:
+            for lecture in module["lectures"]:
+                if int(lecture['id']) == lectureid:
+                    print("set values")
+                    form.lectureid.data = lecture['id']
+                    form.title.data = lecture['title']
+                    form.short.data = lecture['short']
+                    form.description.data = lecture['description']
+                    form.semester.data = lecture['semester']
+                    form.responsible.data = lecture['responsible']
+
+    return render_template("editLecture.html", form=form, title=" Lehrveranstaltung bearbeiten", study=study.json(), moduleid=moduleid)
 
 
+@app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['POST'])
+@login_required_and_roles(role="ADMIN")
+def edit_lecture_post(studyid, moduleid, lectureid):
+    form = LectureForm()
+    study = getstudy(studyid)
 
+    if form.validate_on_submit():
+        lecture = {
+            "moduleid": moduleid,
+            "id": lectureid,
+            "title": form.title.data,
+            "short": form.short.data,
+            "description": form.description.data,
+            "semester": form.duration.data,
+            "responsible": form.responsible.data,
+        }
 
+        print(lecture)
 
+        # add api put request here
 
+        return redirect(url_for('studies_admin'))
 
-
-
-
-
-
-
-
-
-
-
+    return render_template("editLecture.html", form=form, title="Lehrveranstaltung bearbeiten", study=study.json(), moduleid=moduleid)

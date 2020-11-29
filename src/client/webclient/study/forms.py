@@ -24,3 +24,13 @@ class ModuleForm(FlaskForm):
     responsible = StringField('Verantwortlicher Dozent')
     teaching = StringField('Lehrform: x/x/x SWS')
     save = SubmitField('Modul erstellen')
+
+
+class LectureForm(FlaskForm):
+    lectureid = HiddenField()
+    title = StringField('Name der Lehrveranstaltung', validators=[DataRequired()])
+    short = StringField('Kürzel', validators=[DataRequired()])
+    description = TextAreaField('Beschreibung')
+    semester = IntegerField('Semester')
+    responsible = StringField('Verantwortlich')
+    save = SubmitField('Lehrveranstaltung erstellen')

@@ -14,15 +14,18 @@
 
             {% for study in studies %}
                 <div class="col-md-4">
-                    <h2>{{ study.title }}</h2>
-                    <p><a class="btn btn-default" role="button" data-toggle="collapse" href="#toggle{{ study.id }}"
-                          aria-expanded="false" aria-controls="toggle{{ study.id }}">Details</a></p>
+                    <a class="btn col-md-12 border" role="button" data-toggle="collapse"
+                       href="#toggle{{ study.id }}" aria-expanded="false" aria-controls="toggle{{ study.id }}">
+                        <h2>{{ study.title }}</h2>
+                    </a>
                     <div class="collapse" id="toggle{{ study.id }}">
                         <div class="card card-body">
+                            <h5>Beschreibung</h5>
                             {{ study.description }}
 
-                            <a class="btn btn-default" href="/editStudy/{{ study.id }}">Edit</a>
-                            <a class="btn btn-default" href="/study/{{ study.id }}/addModule">add module</a>
+                            <hr class="my-4">
+
+                            <a class="btn btn-default" href="/study/{{ study.id }}">Details</a>
                         </div>
                     </div>
                 </div>

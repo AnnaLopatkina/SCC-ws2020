@@ -3,7 +3,6 @@ from functools import wraps
 from flask import flash, redirect, url_for
 from flask_login import current_user
 
-
 from webclient import db, loginmanager
 from webclient.study.studymanagement import getstudies
 from webclient.user.forms import ProfileForm

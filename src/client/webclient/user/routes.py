@@ -4,10 +4,10 @@ from flask_login import current_user, login_user, login_required, logout_user
 from webclient import app, db
 from webclient.study.models import Study
 from webclient.study.routes import getstudies
-from webclient.user.usermanagement import login_required_and_roles, createprofileform, createstudychoices, \
-    get_role
 from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm
 from webclient.user.models import User, Role
+from webclient.user.usermanagement import login_required_and_roles, createprofileform, createstudychoices, \
+    get_role
 
 
 @app.route('/')
