@@ -1,6 +1,6 @@
 from serviceManager import db
 
-class Module(db.Module):
+class Module(db.Model):
     module_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), unique=True, nullable=False) #muss doch gar nicht unique sein
     short = db.Column(db.String(200), unique=True, nullable=False) #muss doch gar nicht unique sein, hier String(200) wohl zu gross

@@ -11,6 +11,7 @@ class StudyForm(FlaskForm):
                                                                                         message="enter valid number of semesters")],
                              default=6)
     description = TextAreaField('Beschreibung')
+    degree = StringField('Abschluss', validators=[DataRequired()])
     save = SubmitField('save')
 
 

@@ -25,7 +25,7 @@ def studies_edit_admin(studyid):
     r = getstudies()
 
     study = r.json()['studies'][studyid]
-    form = StudyForm(studyid=studyid, title=study['title'], description=study['description'])
+    form = StudyForm(studyid=studyid, title=study['title'], description=study['description'], degree=study['degree'])
 
     return render_template('study_admin_edit.html', form=form)
 
@@ -39,7 +39,9 @@ def studies_edit_admin_post(studyid):
         study = {
             "id": form.studyid.data,
             "title": form.title.data,
-            "description": form.description.data
+            "description": form.description.data,
+            "semesters": form.semesters.data,
+            "degree": form.degree.data
         }
 
         url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
@@ -67,7 +69,9 @@ def studies_save_admin():
         study = {
             "id": form.studyid.data,
             "title": form.title.data,
-            "description": form.description.data
+            "description": form.description.data,
+            "semesters": form.semesters.data,
+            "degree": form.degree.data
         }
         print("send study: {}".format(study))
 

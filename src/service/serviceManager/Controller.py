@@ -1,6 +1,6 @@
 from serviceManager import app, db
 from serviceManager.Study import Study
-from ServiceManaer.Module import Module
+from serviceManager.Module import Module
 from flask import jsonify, request, abort
 from serviceManager.Course import Course
 
@@ -52,8 +52,8 @@ def update_study():
     return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
 
 
-@app.route('/api/study/<int: study_id>/module', methods=['PUT']) #Was machen wir mit den Attributen, die vielleicht nicht gegeben sind?
-def update_module():
+@app.route('/api/study/<int:study_id>/module', methods=['PUT']) #Was machen wir mit den Attributen, die vielleicht nicht gegeben sind?
+def update_module(study_id):
     if not request.json:
         abort(400)
 
@@ -74,7 +74,7 @@ def update_module():
     return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
 
 
-@app.route('/api/study/<int: study_id>/module/<int: module_id>/lecture', methods=['PUT'])
+@app.route('/api/study/<int:study_id>/module/<int:module_id>/lecture', methods=['PUT'])
 def update_lecture(): #Zuweisung zum Modul fehlt noch
     if not request.json:
         abort(400)
