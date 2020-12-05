@@ -2,7 +2,7 @@ from serviceManager import app, db
 from serviceManager.Study import Study
 from serviceManager.Module import Module
 from flask import jsonify, request, abort
-from serviceManager.Course import Course
+from serviceManager.Lecture import Lecture
 
 
 @app.route('/api/studies', methods=['GET'])
@@ -29,9 +29,9 @@ def get_study(study_id):
     if not study:
         return jsonify({'massage': 'No such study'})
 
-    study_data = {'study_id': study.study_id, 'title': study.title, 'description': study.description,
-                  'semester': study.semester, 'degree': study.degree} #nach Fabis definierter API braeuchte man hier degree und description nicht, dafuer aber dringend die Modules!
-    return jsonify({'message': study_data})
+    study_data = {'id': study.study_id, 'title': study.title, 'description': study.description,
+                  'semesters': study.semesters, 'degree': study.degree} #nach Fabis definierter API braeuchte man hier degree und description nicht, dafuer aber dringend die Modules!
+    return jsonify({'study': study_data})
 
 
 @app.route('/api/study', methods=['PUT']) #Updated vorhandenen Studiengang oder erzeugt neuen, je nachdem, ob id mit angeben ist;
@@ -80,36 +80,37 @@ def update_lecture(): #Zuweisung zum Modul fehlt noch
         abort(400)
 
     if request.json["id"] == "":
-        course = Course(request.json["title"], request.json["short"], request.json["description"],
+        lecture = Lecture(request.json["title"], request.json["short"], request.json["description"],
                         request.json["semester"], request.json["responsible"])
     else:
-        course = Course.query.filter_by(course_id=request.json["id"]).first()
-        course.title = request.json["title"]
-        course.short = request.json["short"]
-        course.description = request.json["description"]
-        course.semester = request.json["semester"]
-        course.responsible = request.json["responsible"]
-    db.session.add(course)
+        lecture = Lecture.query.filter_by(lecture_id=request.json["id"]).first()
+        lecture.title = request.json["title"]
+        lecture.short = request.json["short"]
+        lecture.description = request.json["description"]
+        lecture.semester = request.json["semester"]
+        lecture.responsible = request.json["responsible"]
+    db.session.add(lecture)
     db.session.commit()
     return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
 
-#@app.route('/api/courses', methods=['GET'])
+
+#@app.route('/api/lectures', methods=['GET'])
 #def get_courses():
 #    return ''
 
 
-#@app.route('/api/course/<course_id>}', methods=['GET'])
+#@app.route('/api/lecture/<lecture_id>}', methods=['GET'])
 #def get_course(course_id):
 #    return ''
 
 
-#@app.route('/api/courses/possible_courses/<user_id>', methods=['GET'])
+#@app.route('/api/lecture/possible_lectures/<user_id>', methods=['GET'])
 #def get_courses_for_user(user_id):
 #    return ''
 
 
-#@app.route('/api/course/<course_id>', methods=['DELETE'])
-#def delete_course(course_id):
+#@app.route('/api/lecture/<lecture_id>', methods=['DELETE'])
+#def delete_lecture(lecture_id):
 #    return ''
 
 
