@@ -75,7 +75,7 @@ def get_modules(requested_study_id):
             "lectures": lecture_list
         }
         module_list.append(module)
-        return module_list
+    return module_list
 
 @app.route('/api/study', methods=['PUT']) #Updated vorhandenen Studiengang oder erzeugt neuen, je nachdem, ob id mit angeben ist;
 def update_study():
