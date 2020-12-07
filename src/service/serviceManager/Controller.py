@@ -3,6 +3,8 @@ from serviceManager.Study import Study
 from serviceManager.Module import Module
 from flask import jsonify, request, abort
 from serviceManager.Lecture import Lecture
+from ServiceManager.LecturesOfAModule import LecturesOfAModule
+from ServiceManager.ModulesOfStudies import ModulesOfStudies
 
 
 @app.route('/api/studies', methods=['GET'])
@@ -27,12 +29,45 @@ def get_study(study_id):
     study = Study.query.filter_by(study_id=study_id).first()
 
     if not study:
-        return jsonify({'massage': 'No such study'})
+        return jsonify({'message':a 'No such study'})
+
+    modules = get_modules(study_id) #Get all Modules of ModulesOfStudies that belongs to this study ->and then get all lectures that belong to these modules
 
     study_data = {'id': study.study_id, 'title': study.title, 'description': study.description,
-                  'semesters': study.semesters, 'degree': study.degree} #nach Fabis definierter API braeuchte man hier degree und description nicht, dafuer aber dringend die Modules!
+                  'semesters': study.semesters, 'degree': study.degree, 'modules': modules}
     return jsonify({'study': study_data})
 
+def get_modules(requested_study_id):
+    module_list = []
+    modulesOfAStudy = ModulesOfStudies.query.filter_by(study_id = requested_study_id)
+    for moduleId in modulesOfAStudy:
+        module = Module.query.filter_by(module_id=moduleId).first()
+        lecture_list = []
+        lecturesOfAModule = LecturesOfAModule.query.filter_by(module_id=moduleId)
+        for lectureId in lecturesOfAModule:
+            lecture = Lecture.query.filter_by(lecture_id = lectureId).first()
+            lecture = {
+                "id": lecture.lecture_id,
+                "title": lecture.title,
+                "short": lecture.short,
+                "description": lecture.description,
+                "semester": lecture.semester,
+                "responsible": lecture.responsible
+            }
+            lecture_list.append(lecture)
+        module = {
+            "id": module.module_id,
+            "title": module.title,
+            "short": module.short,
+            "duration": module.duration,
+            "credits": module.credits,
+            "description": module.description,
+            "responsible": module.responsible,
+            "teaching": module.teaching,
+            "lectures": lecture_list
+        }
+        module_list.append(module)
+        return module_list
 
 @app.route('/api/study', methods=['PUT']) #Updated vorhandenen Studiengang oder erzeugt neuen, je nachdem, ob id mit angeben ist;
 def update_study():
