@@ -111,7 +111,6 @@ def add_module(studyid):
 @login_required_and_roles(role="ADMIN")
 def add_module_post(studyid):
     form = ModuleForm()
-    study = getstudy(studyid)
 
     print(form.validate())
     print(form.errors)
@@ -140,6 +139,7 @@ def add_module_post(studyid):
 
         return redirect(url_for('studies_admin'))
 
+    study = getstudy(studyid)
     return render_template("editModule.html", form=form, title="Modul erstellen", study=study.json())
 
 
@@ -198,7 +198,7 @@ def edit_module_post(studyid, moduleid):
 @login_required_and_roles(role="ADMIN")
 def study_admin(studyid):
     study = getstudy(studyid)
-
+    json = study.json()
     return render_template("study_admin.html", study=study.json())
 
 
