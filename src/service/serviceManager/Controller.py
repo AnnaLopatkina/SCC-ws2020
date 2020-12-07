@@ -3,8 +3,8 @@ from serviceManager.Study import Study
 from serviceManager.Module import Module
 from flask import jsonify, request, abort
 from serviceManager.Lecture import Lecture
-from ServiceManager.LecturesOfAModule import LecturesOfAModule
-from ServiceManager.ModulesOfStudies import ModulesOfStudies
+from serviceManager.LecturesOfAModule import LecturesOfAModule
+from serviceManager.ModulesOfStudies import ModulesOfStudies
 
 
 @app.route('/api/studies', methods=['GET'])
@@ -29,7 +29,7 @@ def get_study(study_id):
     study = Study.query.filter_by(study_id=study_id).first()
 
     if not study:
-        return jsonify({'message':a 'No such study'})
+        return jsonify({'message': 'No such study'})
 
     modules = get_modules(study_id) #Get all Modules of ModulesOfStudies that belongs to this study ->and then get all lectures that belong to these modules
 
@@ -40,12 +40,20 @@ def get_study(study_id):
 def get_modules(requested_study_id):
     module_list = []
     modulesOfAStudy = ModulesOfStudies.query.filter_by(study_id = requested_study_id)
+    if not modulesOfAStudy:
+        return jsonify({'message': 'No modules available'})
     for moduleId in modulesOfAStudy:
         module = Module.query.filter_by(module_id=moduleId).first()
+        if not module:
+            return jsonify({'message': 'No such module'})
         lecture_list = []
         lecturesOfAModule = LecturesOfAModule.query.filter_by(module_id=moduleId)
+        if not lecturesOfAModule:
+            return jsonify({'message': 'No lectures available'})
         for lectureId in lecturesOfAModule:
             lecture = Lecture.query.filter_by(lecture_id = lectureId).first()
+            if not lecture:
+                return jsonify({'message': 'No such lecture available'})
             lecture = {
                 "id": lecture.lecture_id,
                 "title": lecture.title,
