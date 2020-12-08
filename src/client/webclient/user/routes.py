@@ -82,15 +82,15 @@ def profileedit():
         if Study.query.filter_by(id=form.studies.data).first() is not None:
             user.study = Study.query.filter_by(id=form.studies.data).first().id
         else:
-            r = getstudies()
+            studies = getstudies().json()['studies']
 
-            study = Study()
-            print(r.json())
-            study.id = [study for study in r.json()["studies"] if study['id'] == form.studies.data][0]['id']
-            study.title = [study for study in r.json()["studies"] if study['id'] == form.studies.data][0]['title']
+            new_study = Study()
 
-            db.session.add(study)
-            user.study = study.id
+            new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
+            new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+
+            db.session.add(new_study)
+            user.study = new_study.id
             db.session.add(user)
             db.session.commit()
 
