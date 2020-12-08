@@ -37,9 +37,10 @@ def get_study(study_id):
                   'semesters': study.semesters, 'degree': study.degree, 'modules': modules}
     return jsonify({'study': study_data})
 
+
 def get_modules(requested_study_id):
     module_list = []
-    modulesOfAStudy = ModulesOfStudies.query.filter_by(study_id = requested_study_id)
+    modulesOfAStudy = ModulesOfStudies.query.filter_by(study_id=requested_study_id)
     if not modulesOfAStudy:
         return jsonify({'message': 'No modules available'})
     for moduleId in modulesOfAStudy:
@@ -51,7 +52,7 @@ def get_modules(requested_study_id):
         if not lecturesOfAModule:
             return jsonify({'message': 'No lectures available'})
         for lectureId in lecturesOfAModule:
-            lecture = Lecture.query.filter_by(lecture_id = lectureId).first()
+            lecture = Lecture.query.filter_by(lecture_id=lectureId).first()
             if not lecture:
                 return jsonify({'message': 'No such lecture available'})
             lecture = {
@@ -76,6 +77,7 @@ def get_modules(requested_study_id):
         }
         module_list.append(module)
     return module_list
+
 
 @app.route('/api/study', methods=['PUT']) #Updated vorhandenen Studiengang oder erzeugt neuen, je nachdem, ob id mit angeben ist;
 def update_study():
@@ -136,25 +138,6 @@ def update_lecture(): #Zuweisung zum Modul fehlt noch
     db.session.commit()
     return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
 
-
-#@app.route('/api/lectures', methods=['GET'])
-#def get_courses():
-#    return ''
-
-
-#@app.route('/api/lecture/<lecture_id>}', methods=['GET'])
-#def get_course(course_id):
-#    return ''
-
-
-#@app.route('/api/lecture/possible_lectures/<user_id>', methods=['GET'])
-#def get_courses_for_user(user_id):
-#    return ''
-
-
-#@app.route('/api/lecture/<lecture_id>', methods=['DELETE'])
-#def delete_lecture(lecture_id):
-#    return ''
 
 
 

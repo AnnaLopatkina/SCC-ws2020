@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 from webclient import app, db
 from webclient.config import *
 from webclient.study.forms import StudyForm, ModuleForm, LectureForm
-from webclient.study.models import Study
+from webclient.study.models import Study, Grade
 from webclient.study.studymanagement import getstudies, getstudy
 from webclient.user.models import User
 from webclient.user.usermanagement import login_required_and_roles
@@ -82,6 +82,17 @@ def studies_save_admin():
             print("request failed with status: {}".format(r.status_code))
 
     return redirect(url_for('studies_admin'))
+
+
+@app.route("/myGrades", methods=['GET'])
+@login_required
+def mygrades():
+    data = db.session.query(Grade).filter(User.id == current_user.id)
+
+    if data is None:
+        return render_template("myGrades.html", error=True)
+
+    return render_template("myGrades.html", user=current_user)
 
 
 @app.route("/myStudy", methods=['GET'])
