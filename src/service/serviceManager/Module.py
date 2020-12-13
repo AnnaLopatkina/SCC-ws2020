@@ -2,7 +2,7 @@ from serviceManager import db
 
 class Module(db.Model):
     module_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), unique=True, nullable=False) #muss doch gar nicht unique sein
+    title = db.Column(db.String(200), nullable=False) #muss doch gar nicht unique sein
     short = db.Column(db.String(200), unique=True, nullable=False) #muss doch gar nicht unique sein, hier String(200) wohl zu gross
     duration = db.Column(db.Integer(), nullable=False)  # Datentyp nochmal festlegen
     credits = db.Column(db.Integer, nullable=False)
