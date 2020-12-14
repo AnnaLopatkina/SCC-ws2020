@@ -27,4 +27,4 @@ flask
 
 ## How to run
 
-Docker client: docker run --network rest-net --name webclient -p 443:443 --mount type=bind,source=/home/debian/certs,target=/certs fwao/webclient
+Docker client: docker run -d --network rest-net --name webclient -p 443:443 --mount type=bind,source=/home/debian/certs,target=/certs fwao/webclient
