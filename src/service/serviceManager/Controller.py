@@ -1,10 +1,41 @@
-from serviceManager import app, db
+import json
+import secrets
+
+from serviceManager import app, db, token_password, token_username
 from serviceManager.Study import Study
 from serviceManager.Module import Module
+from serviceManager.Token import Token
 from flask import jsonify, request, abort
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from serviceManager.Lecture import Lecture
 from serviceManager.LecturesOfAModule import LecturesOfAModule
 from serviceManager.ModulesOfStudies import ModulesOfStudies
+
+auth1 = HTTPBasicAuth()
+auth2 = HTTPTokenAuth(scheme='Bearer')
+
+
+@auth1.verify_password
+def verify_password(username, password):
+    if password == token_password and username == token_username:
+        return username
+
+
+@auth2.verify_token
+def verify_token(token):
+    for token1 in Token.query.all():
+        if token == token1.token:
+            return token
+
+
+@app.route('/api/getToken', methods=['GET'])
+@auth1.login_required()
+def get_token():
+    token = Token()
+    token.token = secrets.token_urlsafe(5)
+    db.session.add(token)
+    db.session.commit()
+    return jsonify({'token': token.token})
 
 
 @app.route('/api/studies', methods=['GET'])
@@ -31,7 +62,9 @@ def get_study(study_id):
     if not study:
         return jsonify({'message': 'No such study'})
 
-    modules = get_modules(study_id) #Get all Modules of ModulesOfStudies that belongs to this study ->and then get all lectures that belong to these modules
+    modules = get_modules(
+        study_id)  # Get all Modules of ModulesOfStudies that belongs to this study ->and then get all lectures that
+    # belong to these modules
 
     study_data = {'id': study.study_id, 'title': study.title, 'description': study.description,
                   'semesters': study.semesters, 'degree': study.degree, 'modules': modules}
@@ -79,25 +112,31 @@ def get_modules(requested_study_id):
     return module_list
 
 
-@app.route('/api/study', methods=['PUT']) #Updated vorhandenen Studiengang oder erzeugt neuen, je nachdem, ob id mit angeben ist;
+@app.route('/api/study',
+           methods=['PUT'])  # Updated vorhandenen Studiengang oder erzeugt neuen, je nachdem, ob id mit angeben ist;
+@auth2.login_required()
 def update_study():
     if not request.json:
         abort(400)
 
     if request.json["id"] == "":
-        study = Study(request.json["title"], request.json["description"], request.json["semesters"], request.json["degree"])
+        study = Study(request.json["title"], request.json["description"], request.json["semesters"],
+                      request.json["degree"])
     else:
         study = Study.query.filter_by(study_id=request.json["id"]).first()
         study.title = request.json["title"]
         study.description = request.json["description"]
         study.semester = request.json["semesters"]
-        study.degree = request.json["degree"] #wird momentan vom Client gar nicht zur Verfuegung gestellt, Aendern! -> mindestens in Forms, wahrscheinlich noch woanders
+        study.degree = request.json[
+            "degree"]  # wird momentan vom Client gar nicht zur Verfuegung gestellt, Aendern! -> mindestens in Forms, wahrscheinlich noch woanders
     db.session.add(study)
     db.session.commit()
-    return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/api/study/<int:study_id>/module', methods=['PUT']) #Was machen wir mit den Attributen, die vielleicht nicht gegeben sind?
+@app.route('/api/study/<int:study_id>/module',
+           methods=['PUT'])  # Was machen wir mit den Attributen, die vielleicht nicht gegeben sind?
+@auth2.login_required()
 def update_module(study_id):
     if not request.json:
         abort(400)
@@ -114,19 +153,20 @@ def update_module(study_id):
         module.description = request.json["description"]
         module.responsible = request.json["responsible"]
         module.teaching = request.json["teaching"]
-    db.session.add(module) #Was ist die session? Kann man das so schreiben?
+    db.session.add(module)  # Was ist die session? Kann man das so schreiben?
     db.session.commit()
-    return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
+    return 200  # wenn keine Fehler vorhanden sind, sonst returne 3xx error
 
 
 @app.route('/api/study/<int:study_id>/module/<int:module_id>/lecture', methods=['PUT'])
-def update_lecture(): #Zuweisung zum Modul fehlt noch
+@auth2.login_required()
+def update_lecture():  # Zuweisung zum Modul fehlt noch
     if not request.json:
         abort(400)
 
     if request.json["id"] == "":
         lecture = Lecture(request.json["title"], request.json["short"], request.json["description"],
-                        request.json["semester"], request.json["responsible"])
+                          request.json["semester"], request.json["responsible"])
     else:
         lecture = Lecture.query.filter_by(lecture_id=request.json["id"]).first()
         lecture.title = request.json["title"]
@@ -136,8 +176,4 @@ def update_lecture(): #Zuweisung zum Modul fehlt noch
         lecture.responsible = request.json["responsible"]
     db.session.add(lecture)
     db.session.commit()
-    return 200 #wenn keine Fehler vorhanden sind, sonst returne 3xx error
-
-
-
-
+    return 200  # wenn keine Fehler vorhanden sind, sonst returne 3xx error
