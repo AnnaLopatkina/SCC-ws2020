@@ -1,20 +1,20 @@
+import requests
 from flask import render_template, redirect, url_for, flash, session
 from flask_login import current_user, login_user, login_required, logout_user
 
 from webclient import app, db
 from webclient.study.models import Study
 from webclient.study.routes import getstudies
-from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm
+from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm, APITokenForm
 from webclient.user.models import User, Role
 from webclient.user.usermanagement import login_required_and_roles, createprofileform, createstudychoices, \
     get_role
-
+from webclient.config import service_port, service_ip, api_version
+from requests.auth import HTTPBasicAuth
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
 
 
 @app.route('/login', methods=['GET'])
@@ -128,6 +128,39 @@ def users_admin():
     data = db.session.query(User, Study).outerjoin(Study).all()
 
     return render_template("users.html", data=data)
+
+
+@app.route("/apiToken", methods=['GET'])
+@login_required_and_roles(role="ADMIN")
+def get_api_token():
+    form = APITokenForm()
+
+    return render_template("token_admin.html", form=form)
+
+
+@app.route("/apiToken", methods=['POST'])
+@login_required_and_roles(role="ADMIN")
+def get_api_token_post():
+    form = APITokenForm()
+
+    if form.validate_on_submit():
+        url = "http://{}:{}/{}/getToken".format(service_ip, service_port, api_version)
+
+        r = requests.get(url=url, auth=(form.username.data, form.password.data))
+
+        if r.status_code != 200:
+            print("request failed with status: {}".format(r.status_code))
+            form.password.errors.append('Es konnte kein API Key für diese Zugangsdaten erzeugt werden!')
+            return render_template("token_admin.html", form=form)
+
+        print(r.json())
+        user = User.query.filter_by(id=current_user.id).first()
+        user.api_token = r.json()['token']
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for(index))
+
+    return render_template("token_admin.html", form=form)
 
 
 @app.route("/editUser/<int:userid>", methods=['GET'])

@@ -1,6 +1,7 @@
 import requests
 from flask import render_template, redirect, url_for
 from flask_login import current_user, login_required
+from requests.auth import HTTPBasicAuth
 
 from webclient import app, db
 from webclient.config import *
@@ -77,7 +78,13 @@ def studies_save_admin():
 
         url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
 
-        r = requests.put(url=url, headers=headers, json=study)
+        headers_new = headers
+        headers_new["Authorization"] = "Bearer " + current_user.api_token
+
+        print(headers_new)
+
+        r = requests.put(url=url, headers=headers_new, json=study)
+
         if r.status_code != 200:
             print("request failed with status: {}".format(r.status_code))
 

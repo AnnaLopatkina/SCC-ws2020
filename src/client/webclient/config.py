@@ -18,3 +18,5 @@ headers = {
 admin_username = "admin"
 admin_email = "admin@fwao.de"
 admin_password = "admin"
+
+admin_api_password = "superadmin"

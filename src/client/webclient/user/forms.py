@@ -80,3 +80,10 @@ class RoleForm(FlaskForm):
             for role in Role.query.all():
                 if role.name == name:
                     raise ValidationError('Eine Rolle {} existiert bereits!'.format(name))
+
+
+class APITokenForm(FlaskForm):
+    username = StringField('Nutzername', validators=[DataRequired()])
+    password = PasswordField('Passwort', validators=[DataRequired()])
+
+    submit = SubmitField('Token anfordern')

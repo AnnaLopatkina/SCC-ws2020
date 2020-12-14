@@ -28,6 +28,7 @@ class User(UserMixin, db.Model):
     semester = db.Column(db.Integer(), primary_key=False)
     roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
     study = db.Column(db.Integer, db.ForeignKey('study.id'))
+    api_token = db.Column(db.String(100))
 
     def __init__(self, username, email):
         self.username = username
