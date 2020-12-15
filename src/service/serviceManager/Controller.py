@@ -6,7 +6,7 @@ from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
 from serviceManager import app, db, token_password, token_username
 from serviceManager.Token import Token
-from serviceManager.models import Study, Module, Lecture, StudiesModules
+from serviceManager.models import Study, Module, Lecture, StudiesModules, ModulesLectures
 
 auth1 = HTTPBasicAuth()
 auth2 = HTTPTokenAuth(scheme='Bearer')
@@ -79,13 +79,15 @@ def get_modules(requested_study_id):
         .order_by(Study.study_id).all()
 
     for study, module in data1:
+
         data2 = db.session.query(Module, Lecture) \
             .filter(Module.module_id == module.module_id) \
-            .filter(Module.module_id == StudiesModules.module_id) \
-            .filter(StudiesModules.study_id == Study.study_id).all()
+            .filter(Module.module_id == ModulesLectures.module_id) \
+            .filter(ModulesLectures.lecture_id == Lecture.lecture_id).all()
 
         lectures = []
         for module2, lecture in data2:
+
             lecture_new = {
                 "id": lecture.lecture_id,
                 "title": lecture.title,
