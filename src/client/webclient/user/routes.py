@@ -81,20 +81,22 @@ def profileedit():
 
         user = User.query.filter_by(id=current_user.id).first()
 
-        if Study.query.filter_by(id=form.studies.data).first() is not None:
-            user.study = Study.query.filter_by(id=form.studies.data).first().id
-        else:
-            studies = getstudies().json()['studies']
+        if form.studies.data is not None:
 
-            new_study = Study()
+            if Study.query.filter_by(id=form.studies.data).first() is not None:
+                user.study = Study.query.filter_by(id=form.studies.data).first().id
+            else:
+                studies = getstudies().json()['studies']
 
-            new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
-            new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+                new_study = Study()
 
-            db.session.add(new_study)
-            user.study = new_study.id
-            db.session.add(user)
-            db.session.commit()
+                new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
+                new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+
+                db.session.add(new_study)
+                user.study = new_study.id
+                db.session.add(user)
+                db.session.commit()
 
         user.username = form.name.data
         user.email = form.email.data
@@ -179,19 +181,22 @@ def edit_user_post(userid):
 
         user = User.query.filter_by(id=userid).first()
 
-        if Study.query.filter_by(id=form.studies.data).first() is not None:
-            user.study = Study.query.filter_by(id=form.studies.data).first().id
-        else:
-            r = getstudies()
+        if form.studies.data is not None:
 
-            study = Study()
-            study.id = [study for study in r.json()["studies"] if study['id'] == form.studies.data][0]['id']
-            study.title = [study for study in r.json()["studies"] if study['id'] == form.studies.data][0]['title']
+            if Study.query.filter_by(id=form.studies.data).first() is not None:
+                user.study = Study.query.filter_by(id=form.studies.data).first().id
+            else:
+                studies = getstudies().json()['studies']
 
-            db.session.add(study)
-            user.study = study.id
-            db.session.add(user)
-            db.session.commit()
+                new_study = Study()
+
+                new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
+                new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+
+                db.session.add(new_study)
+                user.study = new_study.id
+                db.session.add(user)
+                db.session.commit()
 
         user.username = form.name.data
         user.email = form.email.data
@@ -199,6 +204,18 @@ def edit_user_post(userid):
 
         if form.passwordold.data != "":
             user.set_password(form.password.data)
+
+        print(form.roles.data)
+        if form.roles.data is not None:
+            if Role.query.filter_by(id=form.roles.data).first() is not None:
+                user.clear_roles()
+                print("set new role {}".format(Role.query.filter_by(id=form.roles.data).first().name))
+                user.set_role(Role.query.filter_by(id=form.roles.data).first())
+
+                if userid == current_user.id:
+                    db.session.add(user)
+                    db.session.commit()
+                    redirect(url_for("logout"))
 
         db.session.add(user)
         db.session.commit()

@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 from webclient import app, db
 from webclient.config import *
 from webclient.study.forms import StudyForm, ModuleForm, LectureForm
-from webclient.study.models import Study, Grade
+from webclient.study.models import Study
 from webclient.study.studymanagement import getstudies, getstudy
 from webclient.user.models import User
 from webclient.user.usermanagement import login_required_and_roles
@@ -69,7 +69,7 @@ def studies_edit_admin_post(studyid):
 @app.route("/addStudy", methods=['GET'])
 @login_required_and_roles(role="ADMIN")
 def studies_add_admin():
-    if current_user.api_token == '':
+    if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
 
     form = StudyForm()
@@ -132,7 +132,7 @@ def mystudy():
 @app.route("/study/<int:studyid>/addModule", methods=['GET'])
 @login_required_and_roles(role="ADMIN")
 def add_module(studyid):
-    if current_user.api_token == '':
+    if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -183,7 +183,7 @@ def add_module_post(studyid):
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['GET'])
 @login_required_and_roles(role="ADMIN")
 def edit_module(studyid, moduleid):
-    if current_user.api_token == '':
+    if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -247,7 +247,7 @@ def study_admin(studyid):
 @app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['GET'])
 @login_required_and_roles(role="ADMIN")
 def add_lecture(studyid, moduleid):
-    if current_user.api_token == '':
+    if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -296,7 +296,7 @@ def add_lecture_post(studyid, moduleid):
 @app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['GET'])
 @login_required_and_roles(role="ADMIN")
 def edit_lecture(studyid, moduleid, lectureid):
-    if current_user.api_token == '':
+    if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)

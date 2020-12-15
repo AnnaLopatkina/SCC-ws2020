@@ -64,8 +64,10 @@ def createprofileform(userid):
 
     user = User.query.filter_by(id=userid).first()
 
+    print((user.get_roles()[0].id, user.get_roles()[0].name))
+
     if user.study:
-        form = ProfileForm(studies=user.study, roles=user.get_roles()[0])
+        form = ProfileForm(studies=user.study, roles=user.get_roles()[0].id)
 
     else:
         form = ProfileForm()
@@ -73,8 +75,9 @@ def createprofileform(userid):
     form.email.data = user.email
     form.name.data = user.username
     form.semester.data = user.semester
-    form.studies.choices = [(study["id"], study["title"]) for study in r.json()["studies"]]
-    form.roles.choices = Role.query.all()
+    form.studies.choices = [(int(study["id"]), study["title"]) for study in r.json()["studies"]]
+    form.roles.choices = [(int(role.id), role.name) for role in Role.query.all()]
+    form.roles.data = str(user.get_roles()[0].id)
 
     return form
 

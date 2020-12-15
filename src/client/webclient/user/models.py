@@ -58,6 +58,9 @@ class User(UserMixin, db.Model):
     def get_roles(self):
         return self.roles
 
+    def clear_roles(self):
+        self.roles.clear()
+
     def get_role_string(self):
         rolestring = ""
         for role in self.get_roles():
