@@ -150,7 +150,7 @@ def get_api_token_post():
 
         if r.status_code != 200:
             print("request failed with status: {}".format(r.status_code))
-            form.password.errors.append('Es konnte kein API Key für diese Zugangsdaten erzeugt werden!')
+            form.submit.errors.append('Es konnte kein API Key für diese Zugangsdaten erzeugt werden!')
             return render_template("token_admin.html", form=form)
 
         print(r.json())
@@ -158,7 +158,7 @@ def get_api_token_post():
         user.api_token = r.json()['token']
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for(index))
+        return redirect(url_for("profile"))
 
     return render_template("token_admin.html", form=form)
 

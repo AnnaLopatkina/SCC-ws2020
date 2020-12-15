@@ -1,15 +1,12 @@
 import json
 import secrets
 
-from serviceManager import app, db, token_password, token_username
-from serviceManager.Study import Study
-from serviceManager.Module import Module
-from serviceManager.Token import Token
 from flask import jsonify, request, abort
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
-from serviceManager.Lecture import Lecture
-from serviceManager.LecturesOfAModule import LecturesOfAModule
-from serviceManager.ModulesOfStudies import ModulesOfStudies
+
+from serviceManager import app, db, token_password, token_username
+from serviceManager.Token import Token
+from serviceManager.models import Study, Module, Lecture, StudiesModules
 
 auth1 = HTTPBasicAuth()
 auth2 = HTTPTokenAuth(scheme='Bearer')
@@ -49,7 +46,8 @@ def get_studies():
             "id": study.study_id,
             "title": study.title,
             "description": study.description,
-            "semesters": study.semesters
+            "semesters": study.semesters,
+            "degree": study.degree
         }
         study_list.append(study)
     return jsonify({'studies': study_list})
@@ -72,23 +70,23 @@ def get_study(study_id):
 
 
 def get_modules(requested_study_id):
-    module_list = []
-    modulesOfAStudy = ModulesOfStudies.query.filter_by(study_id=requested_study_id)
-    if not modulesOfAStudy:
-        return jsonify({'message': 'No modules available'})
-    for moduleId in modulesOfAStudy:
-        module = Module.query.filter_by(module_id=moduleId).first()
-        if not module:
-            return jsonify({'message': 'No such module'})
-        lecture_list = []
-        lecturesOfAModule = LecturesOfAModule.query.filter_by(module_id=moduleId)
-        if not lecturesOfAModule:
-            return jsonify({'message': 'No lectures available'})
-        for lectureId in lecturesOfAModule:
-            lecture = Lecture.query.filter_by(lecture_id=lectureId).first()
-            if not lecture:
-                return jsonify({'message': 'No such lecture available'})
-            lecture = {
+    modules = []
+
+    data1 = db.session.query(Study, Module) \
+        .filter(Study.study_id == requested_study_id) \
+        .filter(Study.study_id == StudiesModules.study_id) \
+        .filter(StudiesModules.module_id == Module.module_id) \
+        .order_by(Study.study_id).all()
+
+    for study, module in data1:
+        data2 = db.session.query(Module, Lecture) \
+            .filter(Module.module_id == module.module_id) \
+            .filter(Module.module_id == StudiesModules.module_id) \
+            .filter(StudiesModules.study_id == Study.study_id).all()
+
+        lectures = []
+        for module2, lecture in data2:
+            lecture_new = {
                 "id": lecture.lecture_id,
                 "title": lecture.title,
                 "short": lecture.short,
@@ -96,8 +94,9 @@ def get_modules(requested_study_id):
                 "semester": lecture.semester,
                 "responsible": lecture.responsible
             }
-            lecture_list.append(lecture)
-        module = {
+            lectures.append(lecture_new)
+
+        module_new = {
             "id": module.module_id,
             "title": module.title,
             "short": module.short,
@@ -106,10 +105,12 @@ def get_modules(requested_study_id):
             "description": module.description,
             "responsible": module.responsible,
             "teaching": module.teaching,
-            "lectures": lecture_list
+            "lectures": lectures
         }
-        module_list.append(module)
-    return module_list
+
+        modules.append(module_new)
+
+    return modules
 
 
 @app.route('/api/study',
@@ -153,14 +154,20 @@ def update_module(study_id):
         module.description = request.json["description"]
         module.responsible = request.json["responsible"]
         module.teaching = request.json["teaching"]
+
     db.session.add(module)  # Was ist die session? Kann man das so schreiben?
     db.session.commit()
-    return 200  # wenn keine Fehler vorhanden sind, sonst returne 3xx error
+
+    study = Study.query.filter_by(study_id=study_id).first()
+    study.add_module(module)
+    db.session.add(study)
+    db.session.commit()
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
 @app.route('/api/study/<int:study_id>/module/<int:module_id>/lecture', methods=['PUT'])
 @auth2.login_required()
-def update_lecture():  # Zuweisung zum Modul fehlt noch
+def update_lecture(study_id, module_id):  # Zuweisung zum Modul fehlt noch
     if not request.json:
         abort(400)
 
@@ -176,4 +183,10 @@ def update_lecture():  # Zuweisung zum Modul fehlt noch
         lecture.responsible = request.json["responsible"]
     db.session.add(lecture)
     db.session.commit()
-    return 200  # wenn keine Fehler vorhanden sind, sonst returne 3xx error
+
+    module = Module.query.filter_by(module_id=module_id).first()
+    module.add_lecture(lecture)
+    db.session.add(module)
+    db.session.commit()
+
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}

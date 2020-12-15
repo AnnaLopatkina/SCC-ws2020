@@ -151,12 +151,12 @@
                         <form class="form-signin" action="" method="post">
                             {{ form.hidden_tag() }}
                             <div class="form-label-group">
-                                {{ form.email(class="form-control", placeholder="Enter E-Mail address", type="email", required="true", autofocus="true") }}
+                                {{ form.email(class="form-control") }}
                                 {{ form.email.label }}
                             </div>
 
                             <div class="form-label-group">
-                                {{ form.password(class="form-control", placeholder="email", required="true", autofocus="true") }}
+                                {{ form.password(class="form-control") }}
                                 {{ form.password.label }}
                             </div>
 

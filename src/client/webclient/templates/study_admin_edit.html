@@ -124,23 +124,28 @@
                         <form class="form-signin" action="" method="post">
                             {{ form.hidden_tag() }}
                             <div class="form-label-group">
-                                {{ form.title(class="form-control", placeholder="Enter name", type="text", required="true", autofocus="true") }}
+                                {{ form.title(class="form-control") }}
                                 {{ form.title.label }}
                             </div>
                             <div class="form-label-group">
-                                {{ form.semesters(class="form-control", autofocus="true") }}
+                                {{ form.semesters(class="form-control") }}
                                 {{ form.semesters.label }}
-                            </div>
-
-                            <div class="form-label-group">
-                                {{ form.description(class="form-control") }}
-                                {{ form.description.label }}
                             </div>
 
                             <div class="form-label-group">
                                 {{ form.degree(class="form-control") }}
                                 {{ form.degree.label }}
                             </div>
+
+                            <hr class="my-4">
+
+                            <div class="form-group">
+                                {{ form.description.label }}
+                                {{ form.description(class="form-control") }}
+
+                            </div>
+
+
 
                             <hr class="my-4">
                             {{ form.save(class="btn btn-lg btn-primary btn-block text-uppercase") }}

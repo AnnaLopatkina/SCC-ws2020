@@ -41,6 +41,7 @@
                                         <p>Semester: {{ lecture.semester }} <br>
                                             Verantwortlich: {{ lecture.responsible }}
                                         </p>
+                                        <a class="btn btn-info" href="/study/{{ study["study"].id }}/module/{{ module.id }}/editLecture/{{ lecture.id }}/addGrade">Note eintragen</a>
                                     </div>
                                 {% endfor %}
                             </div>

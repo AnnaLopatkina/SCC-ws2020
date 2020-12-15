@@ -120,43 +120,31 @@
             <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
                 <div class="card card-signin my-5">
                     <div class="card-body">
-                        <h5 class="card-title text-center">Modul bearbeiten</h5>
-                        <h3>Modulzugehörigkeit:</h3>
-                        <p>{{ moduleid }}</p>
-
-                        <hr class="my-4">
+                        <h3 class="card-title text-center">API Token Generieren</h3>
+                        <p>Bitte hier die Zugangsdaten des Serviceanbieters eintragen: </p>
                         <form class="form-signin" action="" method="post">
                             {{ form.hidden_tag() }}
-                            {{ form.lectureid }}
-                            <div class="form-label-group">
-                                {{ form.title(class="form-control", autofocus="true") }}
-                                {{ form.title.label }}
-                            </div>
-                            <div class="form-label-group">
-                                {{ form.short(class="form-control") }}
-                                {{ form.short.label }}
-                            </div>
-
-
-                            <div class="form-label-group">
-                                {{ form.semester(class="form-control") }}
-                                {{ form.semester.label }}
-                            </div>
-
-                            <div class="form-label-group">
-                                {{ form.responsible(class="form-control") }}
-                                {{ form.responsible.label }}
-                            </div>
 
                             <hr class="my-4">
-                            <div class="form-group">
-                                {{ form.description.label }}
-                                {{ form.description(class="form-control") }}
 
+                            <div class="form-label-group">
+                                {{ form.username(class="form-control") }}
+                                {{ form.username.label }}
                             </div>
 
+                            <div class="form-label-group">
+                                {{ form.password(class="form-control") }}
+                                {{ form.password.label }}
+                            </div>
+
+                            {% for error in form.submit.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
                             <hr class="my-4">
-                            {{ form.save(class="btn btn-lg btn-primary btn-block text-uppercase") }}
+                            {{ form.submit(class="btn btn-lg btn-primary btn-block") }}
                         </form>
                     </div>
                 </div>

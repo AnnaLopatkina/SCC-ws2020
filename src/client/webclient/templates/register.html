@@ -124,7 +124,7 @@
                         <form class="form-signin" action="" method="post">
                             {{ form.hidden_tag() }}
                             <div class="form-label-group">
-                                {{ form.email(class="form-control", placeholder="Enter E-Mail address", type="email", required="true", autofocus="true") }}
+                                {{ form.email(class="form-control") }}
                                 {{ form.email.label }}
                                 {% for error in form.email.errors %}
                                     <div class="alert alert-danger" role="alert">
@@ -133,7 +133,7 @@
                                 {% endfor %}
                             </div>
                             <div class="form-label-group">
-                                {{ form.name(class="form-control", placeholder="Enter name", required="true", autofocus="true") }}
+                                {{ form.name(class="form-control") }}
                                 {{ form.name.label }}
                                 {% for error in form.name.errors %}
                                     <div class="alert alert-danger" role="alert">
@@ -143,7 +143,7 @@
                             </div>
 
                             <div class="form-label-group">
-                                {{ form.password(class="form-control", placeholder="Enter password", required="true", autofocus="true") }}
+                                {{ form.password(class="form-control") }}
                                 {{ form.password.label }}
                                 {% for error in form.password.errors %}
                                     <div class="alert alert-danger" role="alert">
@@ -152,7 +152,7 @@
                                 {% endfor %}
                             </div>
                             <div class="form-label-group">
-                                {{ form.password2(class="form-control", placeholder="Enter password 2nd time", required="true", autofocus="true") }}
+                                {{ form.password2(class="form-control") }}
                                 {{ form.password2.label }}
                                 {% for error in form.password2.errors %}
                                     <div class="alert alert-danger" role="alert">
@@ -161,10 +161,6 @@
                                 {% endfor %}
                             </div>
 
-                            <!--<div class="custom-control custom-checkbox mb-3">
-                                <input type="checkbox" class="custom-control-input" id="termscheck">
-                                <label class="custom-control-label" for="termscheck">AGB akzeptieren</label>
-                            </div>-->
                             {{ form.register(class="btn btn-lg btn-primary btn-block text-uppercase") }}
                             <hr class="my-4">
                         </form>
