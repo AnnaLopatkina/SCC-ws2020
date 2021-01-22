@@ -7,10 +7,11 @@ from webclient.study.models import Study
 from webclient.study.routes import getstudies
 from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm, APITokenForm
 from webclient.user.models import User, Role
-from webclient.user.usermanagement import login_required_and_roles, createprofileform, createstudychoices, \
-    get_role
+from webclient.user.usermanagement import createprofileform, createstudychoices, \
+    get_role, register_user, getToken, check_login, admin_required, getRoles, submit_user
 from webclient.config import service_port, service_ip, api_version
 from requests.auth import HTTPBasicAuth
+
 
 @app.route('/')
 def index():
@@ -19,7 +20,7 @@ def index():
 
 @app.route('/login', methods=['GET'])
 def login():
-    if current_user.is_authenticated:
+    if session['logged_in']:
         return redirect(url_for('index'))
 
     form = LoginForm()
@@ -30,15 +31,26 @@ def login():
 @app.route('/login', methods=['POST'])
 def login2():
     form = LoginForm()
-    form.validate()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Nutzername oder Passwort falsch')
-            return redirect(url_for('login'))
 
-        login_user(user, True)
+    if form.validate_on_submit():
+        # user = User.query.filter_by(email=form.email.data).first()
+        # if user is None or not user.check_password(form.password.data):
+        #     flash('Nutzername oder Passwort falsch')
+        #     return redirect(url_for('login'))
+        #
+        # login_user(user, True)
+
+        response = getToken(form.email.data, form.password.data)
+
+        if response.status_code != 200:
+            form.password.errors.append('Nutzername oder Passwort falsch!')
+            return render_template('login.html', form=form)
+
+        session['token'] = response.json()['token']
+        session['id'] = response.json()['id']
         session['logged_in'] = True
+        session['is_admin'] = response.json()['is_admin']
+
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
 
@@ -55,77 +67,94 @@ def register_post():
     form = RegistrationForm()
 
     if form.validate_on_submit():
-        user = User(username=form.name.data, email=form.email.data)
-        user.set_password(form.password.data)
-        user.set_role(get_role("STUDENT"))
-        db.session.add(user)
-        db.session.commit()
+        response = register_user(form.name.data, form.email.data, form.password.data)
+
+        if response.status_code == 500:
+            for error in response.json()['errors']:
+                if error['error'] == 'email':
+                    form.email.errors.append("Diese E-Mail kann nicht verwendet werden!")
+            return render_template('register.html', form=form)
+
         return redirect(url_for('login'))
+
     return render_template('register.html', form=form)
 
 
 @app.route('/profile', methods=['GET'])
-@login_required
+@check_login
 def profile():
-    form = createprofileform(current_user.id)
+    form = createprofileform(session['id'])
 
     return render_template('profileedit.html', form=form)
 
 
 @app.route('/profile', methods=['POST'])
-@login_required
+@check_login
 def profileedit():
     form = ProfileForm()
 
     if form.validate_on_submit():
 
-        user = User.query.filter_by(id=current_user.id).first()
+        response = submit_user(form.user_id.data, form.passwordold.data, form.password.data, form.name.data,
+                               form.email.data, form.semester.data, form.roles.data, form.studies.data)
 
-        if form.studies.data is not None:
+        if response.status_code == 500:
+            for error in response.json()['errors']:
+                if error['error'] == 'password':
+                    form.passwordold.errors.append("Passwort stimmt nicht!")
 
-            if Study.query.filter_by(id=form.studies.data).first() is not None:
-                user.study = Study.query.filter_by(id=form.studies.data).first().id
-            else:
-                studies = getstudies().json()['studies']
+            form.studies.choices = createstudychoices()
+            form.roles.choices = getRoles().json()['roles']
 
-                new_study = Study()
+            return render_template('profileedit.html', form=form)
 
-                new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
-                new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
-
-                db.session.add(new_study)
-                user.study = new_study.id
-                db.session.add(user)
-                db.session.commit()
-
-        user.username = form.name.data
-        user.email = form.email.data
-        user.semester = form.semester.data
-
-        if form.passwordold.data != "":
-            user.set_password(form.password.data)
-
-        db.session.add(user)
-        db.session.commit()
+        # user = User.query.filter_by(id=current_user.id).first()
+        #
+        # if form.studies.data is not None:
+        #
+        #     if Study.query.filter_by(id=form.studies.data).first() is not None:
+        #         user.study = Study.query.filter_by(id=form.studies.data).first().id
+        #     else:
+        #         studies = getstudies().json()['studies']
+        #
+        #         new_study = Study()
+        #
+        #         new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
+        #         new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+        #
+        #         db.session.add(new_study)
+        #         user.study = new_study.id
+        #         db.session.add(user)
+        #         db.session.commit()
+        #
+        # user.username = form.name.data
+        # user.email = form.email.data
+        # user.semester = form.semester.data
+        #
+        # if form.passwordold.data != "":
+        #     user.set_password(form.password.data)
+        #
+        # db.session.add(user)
+        # db.session.commit()
 
         return redirect(url_for('profile'))
 
     form.studies.choices = createstudychoices()
-    form.roles.choices = Role.query.all()
+    form.roles.choices = getRoles().json()['roles']
 
     return render_template('profileedit.html', form=form)
 
 
 @app.route('/logout')
-@login_required
+@check_login
 def logout():
     session['logged_in'] = False
-    logout_user()
+    session['is_admin'] = False
     return redirect(url_for('index'))
 
 
 @app.route("/users")
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def users_admin():
     data = db.session.query(User, Study).outerjoin(Study).all()
 
@@ -133,7 +162,7 @@ def users_admin():
 
 
 @app.route("/apiToken", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def get_api_token():
     form = APITokenForm()
 
@@ -141,7 +170,7 @@ def get_api_token():
 
 
 @app.route("/apiToken", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def get_api_token_post():
     form = APITokenForm()
 
@@ -166,7 +195,7 @@ def get_api_token_post():
 
 
 @app.route("/editUser/<int:userid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_user(userid):
     form = createprofileform(userid)
 
@@ -174,7 +203,7 @@ def edit_user(userid):
 
 
 @app.route('/editUser/<int:userid>', methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_user_post(userid):
     form = ProfileForm()
     if form.validate_on_submit():
@@ -226,20 +255,20 @@ def edit_user_post(userid):
 
 
 @app.route('/roles')
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def roles():
     return render_template("roles.html", roles=Role.query.all(), title="Rollen")
 
 
 @app.route('/addRole', methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def addRole():
     roleform = RoleForm()
     return render_template("editRole.html", form=roleform)
 
 
 @app.route('/addRole', methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def addRole_post():
     form = RoleForm()
 

@@ -15,11 +15,6 @@ class RegistrationForm(FlaskForm):
     terms = BooleanField('terms')
     register = SubmitField('register')
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError('Verwendung dieser EMail ist nicht möglich!')
-
     def validate_password(self, password):
         if password == "":
             raise ValidationError("Passwort darf nicht leer sein!")
@@ -30,20 +25,9 @@ class LoginForm(FlaskForm):
     password = PasswordField('password', validators=[DataRequired()])
     login = SubmitField('login')
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is None:
-            raise ValidationError("E-Mail oder Passwort ist falsch!")
-
-    def validate_password(self, password):
-        user = User.query.filter_by(email=self.email.data).first()
-        if user is None:
-            raise ValidationError("E-Mail oder Passwort ist falsch!")
-        elif not user.check_password(password.data):
-            raise ValidationError("E-Mail oder Passwort ist falsch!")
-
 
 class ProfileForm(FlaskForm):
+    user_id = HiddenField('ID')
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
     roles = SelectField('Rollen', choices=[], validate_choice=False)
@@ -56,12 +40,6 @@ class ProfileForm(FlaskForm):
     password2 = PasswordField('Neues Passwort Wiederholen',
                               validators=[validators.EqualTo('password', message='Passwörter nicht gleich')])
     editprofile = SubmitField('Profil speichern')
-
-    def validate_passwordold(self, passwordold):
-        if passwordold.data != "":
-            user = User.query.filter_by(email=self.email.data).first()
-            if not user.check_password(passwordold.data):
-                raise ValidationError('Passwort falsch')
 
     def validate_password(self, password):
         if self.passwordold.data != "" and password.data == "":

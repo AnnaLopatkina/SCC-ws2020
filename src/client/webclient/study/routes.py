@@ -9,11 +9,11 @@ from webclient.study.forms import StudyForm, ModuleForm, LectureForm
 from webclient.study.models import Study
 from webclient.study.studymanagement import getstudies, getstudy
 from webclient.user.models import User
-from webclient.user.usermanagement import login_required_and_roles
+from webclient.user.usermanagement import admin_required
 
 
 @app.route("/studiesAdmin")
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_admin():
     r = getstudies()
     print(r.json()['studies'])
@@ -21,7 +21,7 @@ def studies_admin():
 
 
 @app.route("/editStudy/<int:studyid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_edit_admin(studyid):
     if current_user.api_token == '':
         return redirect(url_for("get_api_token"))
@@ -41,7 +41,7 @@ def studies_edit_admin(studyid):
 
 
 @app.route("/editStudy/<int:studyid>", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_edit_admin_post(studyid):
     form = StudyForm()
 
@@ -67,7 +67,7 @@ def studies_edit_admin_post(studyid):
 
 
 @app.route("/addStudy", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_add_admin():
     if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
@@ -77,7 +77,7 @@ def studies_add_admin():
 
 
 @app.route("/addStudy", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_save_admin():
     form = StudyForm()
 
@@ -130,7 +130,7 @@ def mystudy():
 
 
 @app.route("/study/<int:studyid>/addModule", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_module(studyid):
     if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
@@ -142,7 +142,7 @@ def add_module(studyid):
 
 
 @app.route("/study/<int:studyid>/addModule", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_module_post(studyid):
     form = ModuleForm()
 
@@ -181,7 +181,7 @@ def add_module_post(studyid):
 
 
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_module(studyid, moduleid):
     if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
@@ -209,7 +209,7 @@ def edit_module(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_module_post(studyid, moduleid):
     form = ModuleForm()
     study = getstudy(studyid)
@@ -235,7 +235,7 @@ def edit_module_post(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>")
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def study_admin(studyid):
     study = getstudy(studyid)
     json = study.json()
@@ -245,7 +245,7 @@ def study_admin(studyid):
 # Lehrveranstaltungen verwalten
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_lecture(studyid, moduleid):
     if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
@@ -257,7 +257,7 @@ def add_lecture(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_lecture_post(studyid, moduleid):
     form = LectureForm()
     study = getstudy(studyid)
@@ -294,7 +294,7 @@ def add_lecture_post(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_lecture(studyid, moduleid, lectureid):
     if current_user.api_token is None:
         return redirect(url_for("get_api_token"))
@@ -322,7 +322,7 @@ def edit_lecture(studyid, moduleid, lectureid):
 
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_lecture_post(studyid, moduleid, lectureid):
     form = LectureForm()
     study = getstudy(studyid)

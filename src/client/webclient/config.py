@@ -1,5 +1,6 @@
 service_ip = "localhost"
 service_port = "5000"
+userservice_port = "5001"
 
 # API Version when working with real service
 api_version = "api"

@@ -181,7 +181,7 @@
                             <h5>Rollen</h5>
 
                             <div class="form-label-group">
-                                {% if current_user.has_role("ADMIN") %}
+                                {% if session['is_admin'] %}
                                     {{ form.roles(class="form-control") }}
                                 {% else %}
                                     {{ form.roles(class="form-control", disabled="disabled") }}
