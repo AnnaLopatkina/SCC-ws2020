@@ -1,6 +1,7 @@
 from werkzeug.routing import ValidationError
 
-from userService.models import User, Role, Token
+from userService import db
+from userService.models import User, Role, Token, Study
 
 
 def validate_email(email):
@@ -21,3 +22,7 @@ def validate_token(token):
 
 def get_user(user_id):
     return User.query.filter_by(id=user_id).first()
+
+
+def find_users():
+    return db.session.query(User, Study).outerjoin(Study).all()

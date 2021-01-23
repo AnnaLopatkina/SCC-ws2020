@@ -8,13 +8,17 @@ from webclient.study.routes import getstudies
 from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm, APITokenForm
 from webclient.user.models import User, Role
 from webclient.user.usermanagement import createprofileform, createstudychoices, \
-    get_role, register_user, getToken, check_login, admin_required, getRoles, submit_user
+    get_role, register_user, getToken, check_login, admin_required, getRoles, submit_user, find_all_users, getUser
 from webclient.config import service_port, service_ip, api_version
 from requests.auth import HTTPBasicAuth
 
 
 @app.route('/')
 def index():
+    if not 'logged_in' in session:
+        session['logged_in'] = False
+        session['is_admin'] = False
+
     return render_template('index.html')
 
 
@@ -156,9 +160,10 @@ def logout():
 @app.route("/users")
 @admin_required
 def users_admin():
-    data = db.session.query(User, Study).outerjoin(Study).all()
+    data = find_all_users()
+    data_json = data.json()
 
-    return render_template("users.html", data=data)
+    return render_template("users.html", users=data.json()['users'])
 
 
 @app.route("/apiToken", methods=['GET'])
@@ -208,46 +213,59 @@ def edit_user_post(userid):
     form = ProfileForm()
     if form.validate_on_submit():
 
-        user = User.query.filter_by(id=userid).first()
+        user = getUser(userid)
 
-        if form.studies.data is not None:
+        response = submit_user(form.user_id.data, form.passwordold.data, form.password.data, form.name.data,
+                               form.email.data, form.semester.data, form.roles.data, form.studies.data)
 
-            if Study.query.filter_by(id=form.studies.data).first() is not None:
-                user.study = Study.query.filter_by(id=form.studies.data).first().id
-            else:
-                studies = getstudies().json()['studies']
+        if response.status_code == 500:
+            for error in response.json()['errors']:
+                if error['error'] == 'password':
+                    form.passwordold.errors.append("Passwort stimmt nicht!")
 
-                new_study = Study()
+            form.studies.choices = createstudychoices()
+            form.roles.choices = getRoles().json()['roles']
 
-                new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
-                new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+            return render_template('profileedit.html', form=form)
 
-                db.session.add(new_study)
-                user.study = new_study.id
-                db.session.add(user)
-                db.session.commit()
-
-        user.username = form.name.data
-        user.email = form.email.data
-        user.semester = form.semester.data
-
-        if form.passwordold.data != "":
-            user.set_password(form.password.data)
-
-        print(form.roles.data)
-        if form.roles.data is not None:
-            if Role.query.filter_by(id=form.roles.data).first() is not None:
-                user.clear_roles()
-                print("set new role {}".format(Role.query.filter_by(id=form.roles.data).first().name))
-                user.set_role(Role.query.filter_by(id=form.roles.data).first())
-
-                if userid == current_user.id:
-                    db.session.add(user)
-                    db.session.commit()
-                    redirect(url_for("logout"))
-
-        db.session.add(user)
-        db.session.commit()
+        # if form.studies.data is not None:
+        #
+        #     if Study.query.filter_by(id=form.studies.data).first() is not None:
+        #         user.study = Study.query.filter_by(id=form.studies.data).first().id
+        #     else:
+        #         studies = getstudies().json()['studies']
+        #
+        #         new_study = Study()
+        #
+        #         new_study.id = [study for study in studies if study['id'] == int(form.studies.data)][0]['id']
+        #         new_study.title = [study for study in studies if study['id'] == int(form.studies.data)][0]['title']
+        #
+        #         db.session.add(new_study)
+        #         user.study = new_study.id
+        #         db.session.add(user)
+        #         db.session.commit()
+        #
+        # user.username = form.name.data
+        # user.email = form.email.data
+        # user.semester = form.semester.data
+        #
+        # if form.passwordold.data != "":
+        #     user.set_password(form.password.data)
+        #
+        # print(form.roles.data)
+        # if form.roles.data is not None:
+        #     if Role.query.filter_by(id=form.roles.data).first() is not None:
+        #         user.clear_roles()
+        #         print("set new role {}".format(Role.query.filter_by(id=form.roles.data).first().name))
+        #         user.set_role(Role.query.filter_by(id=form.roles.data).first())
+        #
+        #         if userid == current_user.id:
+        #             db.session.add(user)
+        #             db.session.commit()
+        #             redirect(url_for("logout"))
+        #
+        # db.session.add(user)
+        # db.session.commit()
         return redirect(url_for('edit_user', userid=userid))
 
     form.studies.choices = createstudychoices()

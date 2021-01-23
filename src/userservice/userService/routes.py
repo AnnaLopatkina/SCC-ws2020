@@ -4,8 +4,8 @@ from flask import request, abort, jsonify
 from flask_httpauth import HTTPTokenAuth
 
 from userService import app, db
-from userService.models import User, Token, Role
-from userService.usermanagement import validate_email, get_role, get_user
+from userService.models import User, Token, Role, Study
+from userService.usermanagement import validate_email, get_role, get_user, find_users
 
 auth = HTTPTokenAuth(scheme='Bearer')
 
@@ -109,14 +109,24 @@ def get_user_id(user_id):
         return response, 500
 
     roles = []
+    roles_test = user.get_roles()
+
     for role in user.get_roles():
         roles.append({'name': role.name, 'id': role.id})
+
+    if user.study is None:
+        study_id = -1
+        study_title = ''
+    else:
+        study_id = user.study
+        study_title = Study.query.filter_by(id=user.study).first().title
 
     response = {
         'id': user.id,
         'email': user.email,
         'username': user.username,
-        'study': user.study,
+        'study_id': study_id,
+        'study_title': study_title,
         'roles': roles,
         'semester': user.semester
     }
@@ -157,7 +167,19 @@ def edit_user():
     user.username = request.json['username']
     user.semester = request.json['semester']
 
+    if request.json['study']['id'] != '':
 
+        if Study.query.filter_by(id=request.json['study']['id']).first() is not None:
+            user.study = Study.query.filter_by(id=request.json['study']['id']).first().id
+        else:
+            new_study = Study()
+            new_study.id = request.json['study']['id']
+            new_study.title = request.json['study']['title']
+
+            db.session.add(new_study)
+            user.study = new_study.id
+            db.session.add(user)
+            db.session.commit()
 
     db.session.add(user)
     db.session.commit()
@@ -165,8 +187,38 @@ def edit_user():
     return {'success': True}, 200
 
 
-def generate_error(errors):
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    data = find_users()
 
+    users = []
+
+    for user, study in data:
+        roles = []
+        for role in user.get_roles():
+            roles.append({'name': role.name, 'id': role.id})
+
+        if study is None:
+            study = Study()
+            study.id = '-1'
+            study.title = ''
+
+        user = {
+            'id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'semester': user.semester,
+            'roles': roles,
+            'study_id': study.id,
+            'study_title': study.title
+        }
+
+        users.append(user)
+
+    return {'users': users}, 200
+
+
+def generate_error(errors):
     errorlist = []
     for error in errors:
         errorlist.append({'error': error})

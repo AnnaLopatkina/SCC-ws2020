@@ -81,8 +81,8 @@ def createprofileform(user_id):
 
     user = getUser(user_id)
 
-    if user.json()['study']:
-        form = ProfileForm(studies=user.json()['study'], roles=user.json()['roles'])
+    if user.json()['study_id']:
+        form = ProfileForm(studies=user.json()['study_id'], roles=user.json()['roles'])
 
     else:
         form = ProfileForm()
@@ -116,6 +116,19 @@ def getUser(user_id):
     return r
 
 
+def find_all_users():
+    url = "http://{}:{}/{}/users".format(service_ip, userservice_port, api_version)
+
+    headers_token = headers
+    headers_token["Authorization"] = "Bearer " + session['token']
+
+    r = requests.get(url=url, headers=headers_token)
+    if r.status_code != 200:
+        print("request failed with status: {}".format(r.status_code))
+
+    return r
+
+
 def getRoles():
     url = "http://{}:{}/{}/getRoles".format(service_ip, userservice_port, api_version)
 
@@ -135,6 +148,13 @@ def submit_user(user_id, passwordold, passwordnew, username, email, semester, ro
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']
 
+    study_title = ''
+
+    studies = getstudies()
+    for study in studies.json()['studies']:
+        if study['id'] == study_id:
+            study_title = study['title']
+
     user = {
         'id': user_id,
         'passwordold': passwordold,
@@ -143,7 +163,10 @@ def submit_user(user_id, passwordold, passwordnew, username, email, semester, ro
         'email': email,
         'semester': semester,
         'role': role_id,
-        'study': study_id
+        'study': {
+            'id': study_id,
+            'title': study_title
+        }
     }
 
     r = requests.put(url=url, headers=headers_token, json=user)
@@ -152,3 +175,4 @@ def submit_user(user_id, passwordold, passwordnew, username, email, semester, ro
         print("request failed with status: {}".format(r.status_code))
 
     return r
+
