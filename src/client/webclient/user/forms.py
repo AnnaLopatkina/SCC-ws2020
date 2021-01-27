@@ -54,10 +54,6 @@ class RoleForm(FlaskForm):
     def validate_name(self, name):
         if name == "":
             raise ValidationError('Rollenname darf nicht leer sein!')
-        else:
-            for role in Role.query.all():
-                if role.name == name:
-                    raise ValidationError('Eine Rolle {} existiert bereits!'.format(name))
 
 
 class APITokenForm(FlaskForm):

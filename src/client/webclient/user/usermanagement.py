@@ -29,6 +29,33 @@ def getToken(email, password):
     return r
 
 
+def setStudyToken(token):
+
+    url = "http://{}:{}/{}/setStudyToken/{}".format(service_ip, userservice_port, api_version, session['id'])
+
+    headers_token = headers
+    headers_token["Authorization"] = "Bearer " + session['token']
+
+    r = requests.put(url=url, headers=headers, json={'study_token': token})
+    if r.status_code != 200:
+        print("request failed with status: {}".format(r.status_code))
+
+    return r
+
+
+def create_role(name):
+    url = "http://{}:{}/{}/addRole".format(service_ip, userservice_port, api_version)
+
+    headers_token = headers
+    headers_token["Authorization"] = "Bearer " + session['token']
+
+    r = requests.put(url=url, headers=headers, json={'name': name})
+    if r.status_code != 200:
+        print("request failed with status: {}".format(r.status_code))
+
+    return r
+
+
 def check_login(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -76,6 +103,8 @@ def get_role(rolestring):
     return role
 
 
+
+
 def createprofileform(user_id):
     r = getstudies()
 
@@ -92,7 +121,7 @@ def createprofileform(user_id):
     form.name.data = user.json()['username']
     form.semester.data = user.json()['semester']
     form.studies.choices = [(int(study["id"]), study["title"]) for study in r.json()["studies"]]
-    form.roles.choices = [(int(role['id']), role['name']) for role in getRoles().json()['roles']]
+    form.roles.choices = [(int(role['id']), role['name']) for role in get_roles().json()['roles']]
     form.roles.data = str(user.json()['roles'][0]['id'])
 
     return form
@@ -129,7 +158,7 @@ def find_all_users():
     return r
 
 
-def getRoles():
+def get_roles():
     url = "http://{}:{}/{}/getRoles".format(service_ip, userservice_port, api_version)
 
     headers_token = headers

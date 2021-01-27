@@ -8,7 +8,8 @@ from webclient.study.routes import getstudies
 from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm, APITokenForm
 from webclient.user.models import User, Role
 from webclient.user.usermanagement import createprofileform, createstudychoices, \
-    get_role, register_user, getToken, check_login, admin_required, getRoles, submit_user, find_all_users, getUser
+    get_role, register_user, getToken, check_login, admin_required, get_roles, submit_user, find_all_users, getUser, \
+    setStudyToken, create_role
 from webclient.config import service_port, service_ip, api_version
 from requests.auth import HTTPBasicAuth
 
@@ -54,6 +55,8 @@ def login2():
         session['id'] = response.json()['id']
         session['logged_in'] = True
         session['is_admin'] = response.json()['is_admin']
+        if session['is_admin']:
+            session['studyapi_token'] = response.json()['study_token']
 
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
@@ -108,7 +111,7 @@ def profileedit():
                     form.passwordold.errors.append("Passwort stimmt nicht!")
 
             form.studies.choices = createstudychoices()
-            form.roles.choices = getRoles().json()['roles']
+            form.roles.choices = get_roles().json()['roles']
 
             return render_template('profileedit.html', form=form)
 
@@ -144,7 +147,7 @@ def profileedit():
         return redirect(url_for('profile'))
 
     form.studies.choices = createstudychoices()
-    form.roles.choices = getRoles().json()['roles']
+    form.roles.choices = get_roles().json()['roles']
 
     return render_template('profileedit.html', form=form)
 
@@ -190,10 +193,10 @@ def get_api_token_post():
             return render_template("token_admin.html", form=form)
 
         print(r.json())
-        user = User.query.filter_by(id=current_user.id).first()
-        user.api_token = r.json()['token']
-        db.session.add(user)
-        db.session.commit()
+        if setStudyToken(r.json()['token']).status_code == 200:
+            print("set admin study api token")
+            session['studyapi_token'] = r.json()['token']
+
         return redirect(url_for("profile"))
 
     return render_template("token_admin.html", form=form)
@@ -224,7 +227,7 @@ def edit_user_post(userid):
                     form.passwordold.errors.append("Passwort stimmt nicht!")
 
             form.studies.choices = createstudychoices()
-            form.roles.choices = getRoles().json()['roles']
+            form.roles.choices = get_roles().json()['roles']
 
             return render_template('profileedit.html', form=form)
 
@@ -275,7 +278,9 @@ def edit_user_post(userid):
 @app.route('/roles')
 @admin_required
 def roles():
-    return render_template("roles.html", roles=Role.query.all(), title="Rollen")
+    roles = get_roles()
+
+    return render_template("roles.html", roles=roles.json()['roles'], title="Rollen")
 
 
 @app.route('/addRole', methods=['GET'])
@@ -291,11 +296,11 @@ def addRole_post():
     form = RoleForm()
 
     if form.validate_on_submit():
-        role = Role()
-        role.name = form.name.data
-        db.session.add(role)
-        db.session.commit()
+        response = create_role(form.name.data)
 
-        return redirect(url_for('roles'))
+        if response.status_code == 200:
+            return redirect(url_for('roles'))
 
-    render_template("editRole.html", form=form)
+        form.name.errors.append("Rolle existiert bereits!")
+
+    return render_template("editRole.html", form=form)

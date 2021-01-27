@@ -131,6 +131,12 @@
                                 {{ form.name.label }}
                             </div>
 
+                            {% for error in form.name.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
                             <hr class="my-4">
                             {{ form.save(class="btn btn-lg btn-primary btn-block") }}
                         </form>

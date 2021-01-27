@@ -29,6 +29,10 @@ class Token(db.Model):
     key = db.Column(db.String(99), primary_key=True)
 
 
+class Stoken(db.Model):
+    key = db.Column(db.String(99), primary_key=True)
+
+
 class UserToken(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
@@ -44,6 +48,7 @@ class User(db.Model):
     roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
     study = db.Column(db.Integer, db.ForeignKey('study.id'))
     token = db.Column(db.String, db.ForeignKey('token.key'))
+    stoken = db.Column(db.String, db.ForeignKey('stoken.key'))
 
     def __init__(self, username, email):
         self.username = username

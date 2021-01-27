@@ -97,7 +97,7 @@ def login_token():
 
     user = User.query.filter_by(email=request.json['email']).first()
 
-    return {'token': token.key, 'is_admin': user.is_admin(), 'id': user.id}, 200
+    return {'token': token.key, 'is_admin': user.is_admin(), 'id': user.id, 'study_token': user.stoken}, 200
 
 
 @app.route('/api/user/<int:user_id>', methods=['GET'])
@@ -188,6 +188,7 @@ def edit_user():
 
 
 @app.route('/api/users', methods=['GET'])
+@auth.login_required()
 def get_users():
     data = find_users()
 
@@ -218,6 +219,43 @@ def get_users():
     return {'users': users}, 200
 
 
+@app.route("/api/setStudyToken/<int:user_id>", methods=['PUT'])
+@auth.login_required()
+def set_study_token(user_id):
+    if not request.json:
+        abort(400)
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if user is None:
+        return generate_error(["user"]), 400
+
+    user.study_api_token = request.json['study_token']
+
+    db.session.add(user)
+    db.session.commit()
+
+    return {'success': True}, 200
+
+
+@app.route("/api/addRole", methods=['PUT'])
+@auth.login_required()
+def add_role():
+    if not request.json:
+        abort(400)
+
+    if Role.query.filter_by(name=request.json['name']).first() is not None:
+        return generate_error(['role']), 500
+
+    role = Role()
+    role.name = request.json['name']
+
+    db.session.add(role)
+    db.session.commit()
+
+    return {'success': True}, 200
+
+
 def generate_error(errors):
     errorlist = []
     for error in errors:
@@ -228,3 +266,5 @@ def generate_error(errors):
     }
 
     return response
+
+
