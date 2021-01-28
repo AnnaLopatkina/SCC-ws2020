@@ -1,10 +1,9 @@
 import requests
 from flask import render_template, redirect, url_for
 
-from webclient import app, db
+from webclient import app
 from webclient.config import *
 from webclient.study.forms import StudyForm, ModuleForm, LectureForm
-from webclient.study.models import Study
 from webclient.study.studymanagement import getstudies, getstudy, update_module, update_lecture
 from webclient.user.usermanagement import admin_required, check_login, getUser
 
@@ -24,8 +23,6 @@ def studies_edit_admin(studyid):
         return redirect(url_for("get_api_token"))
 
     r = getstudies()
-
-    study = Study()
 
     for a in r.json()['studies']:
         if a['id'] == studyid:
@@ -101,15 +98,15 @@ def studies_save_admin():
     return redirect(url_for('studies_admin'))
 
 
-@app.route("/myGrades", methods=['GET'])
-@check_login
-def mygrades():
-    data = db.session.query(Grade).filter(User.id == current_user.id)
-
-    if data is None:
-        return render_template("myGrades.html", error=True)
-
-    return render_template("myGrades.html", user=current_user)
+# @app.route("/myGrades", methods=['GET'])
+# @check_login
+# def mygrades():
+#     data = db.session.query(Grade).filter(User.id == current_user.id)
+#
+#     if data is None:
+#         return render_template("myGrades.html", error=True)
+#
+#     return render_template("myGrades.html", user=current_user)
 
 
 @app.route("/myStudy", methods=['GET'])

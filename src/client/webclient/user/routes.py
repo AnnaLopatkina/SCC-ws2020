@@ -1,10 +1,10 @@
 import requests
 from flask import render_template, redirect, url_for, flash, session
 
-from webclient import app, db
+from webclient import app
 from webclient.user.forms import LoginForm, RegistrationForm, ProfileForm, RoleForm, APITokenForm
 from webclient.user.usermanagement import createprofileform, createstudychoices, \
-    get_role, register_user, getToken, check_login, admin_required, get_roles, submit_user, find_all_users, getUser, \
+    register_user, getToken, check_login, admin_required, get_roles, submit_user, find_all_users, getUser, \
     setStudyToken, create_role
 from webclient.config import service_port, service_ip, api_version
 

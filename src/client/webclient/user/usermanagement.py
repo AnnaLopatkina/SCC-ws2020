@@ -2,9 +2,7 @@ from functools import wraps
 
 import requests
 from flask import flash, redirect, url_for, session
-from flask_login import current_user
 
-from webclient import db
 from webclient.config import service_ip, userservice_port, api_version, headers
 from webclient.study.studymanagement import getstudies
 from webclient.user.forms import ProfileForm
@@ -79,16 +77,6 @@ def admin_required(f):
             return redirect(url_for('index'))
 
     return wrap
-
-
-
-
-
-def get_role(rolestring):
-    role = Role.query.filter_by(name=rolestring).first()
-    return role
-
-
 
 
 def createprofileform(user_id):
