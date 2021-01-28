@@ -4,11 +4,10 @@ import requests
 from flask import flash, redirect, url_for, session
 from flask_login import current_user
 
-from webclient import db, loginmanager
+from webclient import db
 from webclient.config import service_ip, userservice_port, api_version, headers
 from webclient.study.studymanagement import getstudies
 from webclient.user.forms import ProfileForm
-from webclient.user.models import Role, User
 
 
 def register_user(username, email, password):
@@ -82,20 +81,7 @@ def admin_required(f):
     return wrap
 
 
-def add_role(user, rolestring):
-    role = Role.query.filter_by(name=rolestring).first()
-    print(role)
-    if role is None:
-        print("create new Role {}".format(rolestring))
-        role = Role()
-        role.name = rolestring
-        db.session.add(role)
 
-    print("add role to user")
-    user.roles.append(role)
-
-    db.session.add(user)
-    db.session.commit()
 
 
 def get_role(rolestring):

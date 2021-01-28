@@ -3,8 +3,6 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, Selec
     HiddenField, validators
 from wtforms.validators import ValidationError, Email, EqualTo, DataRequired
 
-from webclient.user.models import User, Role
-
 
 class RegistrationForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])

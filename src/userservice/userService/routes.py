@@ -5,7 +5,7 @@ from flask_httpauth import HTTPTokenAuth
 
 from userService import app, db
 from userService.models import User, Token, Role, Study
-from userService.usermanagement import validate_email, get_role, get_user, find_users
+from userService.usermanagement import validate_email, get_role, get_user, find_users, is_admin_token, set_role
 
 auth = HTTPTokenAuth(scheme='Bearer')
 
@@ -149,6 +149,8 @@ def get_roles():
 @app.route('/api/editUser', methods=['PUT'])
 @auth.login_required()
 def edit_user():
+    print(request.headers.get('Authorization').replace('Bearer ', ''))
+    print(is_admin_token(request.headers.get('Authorization').replace('Bearer ', '')))
     if not request.json:
         abort(400)
 
@@ -180,6 +182,10 @@ def edit_user():
             user.study = new_study.id
             db.session.add(user)
             db.session.commit()
+
+    # edit roles only if admin is doing it
+    if is_admin_token(request.headers.get('Authorization').replace('Bearer ', '')):
+        set_role(user, request.json['role'])
 
     db.session.add(user)
     db.session.commit()

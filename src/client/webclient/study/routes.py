@@ -1,15 +1,12 @@
 import requests
 from flask import render_template, redirect, url_for
-from flask_login import current_user, login_required
-from requests.auth import HTTPBasicAuth
 
 from webclient import app, db
 from webclient.config import *
 from webclient.study.forms import StudyForm, ModuleForm, LectureForm
 from webclient.study.models import Study
 from webclient.study.studymanagement import getstudies, getstudy
-from webclient.user.models import User
-from webclient.user.usermanagement import admin_required
+from webclient.user.usermanagement import admin_required, check_login
 
 
 @app.route("/studiesAdmin")
@@ -23,7 +20,7 @@ def studies_admin():
 @app.route("/editStudy/<int:studyid>", methods=['GET'])
 @admin_required
 def studies_edit_admin(studyid):
-    if current_user.api_token == '':
+    if session['studyapi_token'] == '':
         return redirect(url_for("get_api_token"))
 
     r = getstudies()
@@ -57,7 +54,7 @@ def studies_edit_admin_post(studyid):
         url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
 
         headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
+        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
 
         r = requests.put(url=url, headers=headers_token, json=study)
         if r.status_code != 200:
@@ -69,7 +66,7 @@ def studies_edit_admin_post(studyid):
 @app.route("/addStudy", methods=['GET'])
 @admin_required
 def studies_add_admin():
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     form = StudyForm()
@@ -94,7 +91,7 @@ def studies_save_admin():
         url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
 
         headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
+        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
 
         r = requests.put(url=url, headers=headers_token, json=study)
 
@@ -105,7 +102,7 @@ def studies_save_admin():
 
 
 @app.route("/myGrades", methods=['GET'])
-@login_required
+@check_login
 def mygrades():
     data = db.session.query(Grade).filter(User.id == current_user.id)
 
@@ -116,7 +113,7 @@ def mygrades():
 
 
 @app.route("/myStudy", methods=['GET'])
-@login_required
+@check_login
 def mystudy():
     data = db.session.query(Study).join(User).filter(User.email == current_user.email).first()
 
@@ -132,7 +129,7 @@ def mystudy():
 @app.route("/study/<int:studyid>/addModule", methods=['GET'])
 @admin_required
 def add_module(studyid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -167,7 +164,7 @@ def add_module_post(studyid):
 
         url = "http://{}:{}/{}/study/{}/module".format(service_ip, service_port, api_version, studyid)
         headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
+        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
 
         r = requests.put(url=url, headers=headers_token, json=module)
 
@@ -183,7 +180,7 @@ def add_module_post(studyid):
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['GET'])
 @admin_required
 def edit_module(studyid, moduleid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -247,7 +244,7 @@ def study_admin(studyid):
 @app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['GET'])
 @admin_required
 def add_lecture(studyid, moduleid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -282,7 +279,7 @@ def add_lecture_post(studyid, moduleid):
                                                                   moduleid)
 
         headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
+        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
 
         r = requests.put(url=url, headers=headers_token, json=lecture)
         if r.status_code != 200:
@@ -296,7 +293,7 @@ def add_lecture_post(studyid, moduleid):
 @app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['GET'])
 @admin_required
 def edit_lecture(studyid, moduleid, lectureid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
