@@ -5,8 +5,8 @@ from webclient import app, db
 from webclient.config import *
 from webclient.study.forms import StudyForm, ModuleForm, LectureForm
 from webclient.study.models import Study
-from webclient.study.studymanagement import getstudies, getstudy
-from webclient.user.usermanagement import admin_required, check_login
+from webclient.study.studymanagement import getstudies, getstudy, update_module, update_lecture
+from webclient.user.usermanagement import admin_required, check_login, getUser
 
 
 @app.route("/studiesAdmin")
@@ -115,15 +115,15 @@ def mygrades():
 @app.route("/myStudy", methods=['GET'])
 @check_login
 def mystudy():
-    data = db.session.query(Study).join(User).filter(User.email == current_user.email).first()
+    user = getUser(session['id'])
 
-    if data is None:
+    if user.json()['study_id'] is None or '':
         return render_template("mystudy.html", error=True)
 
-    r = getstudy(data.id)
+    r = getstudy(user.json()['study_id'])
     print(r.json())
 
-    return render_template("mystudy.html", study=r.json(), user=current_user)
+    return render_template("mystudy.html", study=r.json(), user=user.json())
 
 
 @app.route("/study/<int:studyid>/addModule", methods=['GET'])
@@ -162,14 +162,7 @@ def add_module_post(studyid):
         # add api put request here
         print(module)
 
-        url = "http://{}:{}/{}/study/{}/module".format(service_ip, service_port, api_version, studyid)
-        headers_token = headers
-        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
-
-        r = requests.put(url=url, headers=headers_token, json=module)
-
-        if r.status_code != 200:
-            print("request failed with status: {}".format(r.status_code))
+        update_module(studyid, module)
 
         return redirect(url_for('study_admin', studyid=studyid))
 
@@ -213,6 +206,7 @@ def edit_module_post(studyid, moduleid):
 
     if form.validate_on_submit():
         module = {
+            "id": moduleid,
             "title": form.title.data,
             "short": form.short.data,
             "description": form.description.data,
@@ -224,7 +218,7 @@ def edit_module_post(studyid, moduleid):
 
         print(module)
 
-        # add api put request here
+        update_module(studyid, module)
 
         return redirect(url_for('studies_admin'))
 
@@ -275,15 +269,7 @@ def add_lecture_post(studyid, moduleid):
 
         print(lecture)
 
-        url = "http://{}:{}/{}/study/{}/module/{}/lecture".format(service_ip, service_port, api_version, studyid,
-                                                                  moduleid)
-
-        headers_token = headers
-        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
-
-        r = requests.put(url=url, headers=headers_token, json=lecture)
-        if r.status_code != 200:
-            print("request failed with status: {}".format(r.status_code))
+        update_lecture(studyid, moduleid, lecture)
 
         return redirect(url_for('study_admin', studyid=studyid))
 
@@ -337,7 +323,7 @@ def edit_lecture_post(studyid, moduleid, lectureid):
 
         print(lecture)
 
-        # add api put request here
+        update_lecture(studyid, moduleid, lecture)
 
         return redirect(url_for('study_admin', studyid=studyid))
 
