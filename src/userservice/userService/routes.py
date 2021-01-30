@@ -40,7 +40,7 @@ def register_user():
                 }
             ]
         }
-        return jsonify(response), 500
+        return jsonify(response), 400
 
     print("register new user")
 
@@ -77,7 +77,7 @@ def login_token():
                 }
             ]
         }
-        return jsonify(response), 500
+        return jsonify(response), 400
 
     if not user.check_password(password=request.json['password']):
         response = {
@@ -87,7 +87,7 @@ def login_token():
                 }
             ]
         }
-        return jsonify(response), 500
+        return jsonify(response), 400
 
     token = Token()
     if user.token is None:
@@ -114,7 +114,7 @@ def get_user_id(user_id):
     user = get_user(user_id)
     if user is None:
         response = generate_error(['user'])
-        return response, 500
+        return response, 400
 
     roles = []
     roles_test = user.get_roles()
@@ -172,7 +172,7 @@ def edit_user():
         else:
             print("password wrong")
             response = generate_error(["password"])
-            return response, 500
+            return response, 400
 
     user.username = request.json['username']
     user.semester = request.json['semester']
@@ -259,7 +259,7 @@ def add_role():
         abort(400)
 
     if Role.query.filter_by(name=request.json['name']).first() is not None:
-        return generate_error(['role']), 500
+        return generate_error(['role']), 400
 
     role = Role()
     role.name = request.json['name']
