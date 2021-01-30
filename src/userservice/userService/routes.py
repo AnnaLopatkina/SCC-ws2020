@@ -202,7 +202,7 @@ def edit_user():
 
 
 @app.route('/api/users', methods=['GET'])
-@auth.login_required()
+@auth2.login_required()
 def get_users():
     data = find_users()
 
@@ -234,7 +234,7 @@ def get_users():
 
 
 @app.route("/api/setStudyToken/<int:user_id>", methods=['PUT'])
-@auth.login_required()
+@auth2.login_required()
 def set_study_token(user_id):
     if not request.json:
         abort(400)
