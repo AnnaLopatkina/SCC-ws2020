@@ -10,4 +10,3 @@ app.config['SECRET_KEY'] = 'dsuiafohu0o437tzghsrodinzt478oemsfuhidohsguieo'
 
 import webclient.study.routes
 import webclient.user.routes
-import webclient.fakeapi

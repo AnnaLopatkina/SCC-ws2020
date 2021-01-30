@@ -8,12 +8,20 @@ from userService.models import User, Token, Role, Study
 from userService.usermanagement import validate_email, get_role, get_user, find_users, is_admin_token, set_role
 
 auth = HTTPTokenAuth(scheme='Bearer')
+auth2 = HTTPTokenAuth(scheme='Bearer')
 
 
 @auth.verify_token
 def verify_token(token):
     for token1 in Token.query.all():
         if token == token1.key:
+            return token
+
+
+@auth2.verify_token
+def verify_token(token):
+    for token1 in Token.query.all():
+        if token == token1.key and is_admin_token(token):
             return token
 
 
@@ -245,7 +253,7 @@ def set_study_token(user_id):
 
 
 @app.route("/api/addRole", methods=['PUT'])
-@auth.login_required()
+@auth2.login_required()
 def add_role():
     if not request.json:
         abort(400)

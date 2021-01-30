@@ -10,4 +10,4 @@ RUN pipenv install
 
 ENV FLASK_APP app.py
 
-CMD [ "pipenv", "run", "gunicorn", "-w", "4", "-b", ":5001", "app:app" ]
+CMD [ "pipenv", "run", "gunicorn", "-w", "1", "-b", ":5001", "app:app" ]

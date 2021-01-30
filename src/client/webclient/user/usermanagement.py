@@ -3,13 +3,13 @@ from functools import wraps
 import requests
 from flask import flash, redirect, url_for, session
 
-from webclient.config import service_ip, userservice_port, api_version, headers
+from webclient.config import service_ip, userservice_port, api_version, headers, userservice_ip
 from webclient.study.studymanagement import getstudies
 from webclient.user.forms import ProfileForm
 
 
 def register_user(username, email, password):
-    url = "http://{}:{}/{}/registerUser".format(service_ip, userservice_port, api_version)
+    url = "http://{}:{}/{}/registerUser".format(userservice_ip, userservice_port, api_version)
     r = requests.put(url=url, headers=headers, json={'name': username, 'email': email, 'password': password})
     if r.status_code != 200:
         print("request failed with status: {}".format(r.status_code))
@@ -18,7 +18,7 @@ def register_user(username, email, password):
 
 
 def getToken(email, password):
-    url = "http://{}:{}/{}/loginToken".format(service_ip, userservice_port, api_version)
+    url = "http://{}:{}/{}/loginToken".format(userservice_ip, userservice_port, api_version)
     r = requests.post(url=url, headers=headers, json={'email': email, 'password': password})
     if r.status_code != 200:
         print("request failed with status: {}".format(r.status_code))
@@ -28,7 +28,7 @@ def getToken(email, password):
 
 def setStudyToken(token):
 
-    url = "http://{}:{}/{}/setStudyToken/{}".format(service_ip, userservice_port, api_version, session['id'])
+    url = "http://{}:{}/{}/setStudyToken/{}".format(userservice_ip, userservice_port, api_version, session['id'])
 
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']
@@ -41,7 +41,7 @@ def setStudyToken(token):
 
 
 def create_role(name):
-    url = "http://{}:{}/{}/addRole".format(service_ip, userservice_port, api_version)
+    url = "http://{}:{}/{}/addRole".format(userservice_ip, userservice_port, api_version)
 
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']
@@ -107,7 +107,7 @@ def createstudychoices():
 
 
 def getUser(user_id):
-    url = "http://{}:{}/{}/user/{}".format(service_ip, userservice_port, api_version, user_id)
+    url = "http://{}:{}/{}/user/{}".format(userservice_ip, userservice_port, api_version, user_id)
 
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']
@@ -120,7 +120,7 @@ def getUser(user_id):
 
 
 def find_all_users():
-    url = "http://{}:{}/{}/users".format(service_ip, userservice_port, api_version)
+    url = "http://{}:{}/{}/users".format(userservice_ip, userservice_port, api_version)
 
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']
@@ -133,7 +133,7 @@ def find_all_users():
 
 
 def get_roles():
-    url = "http://{}:{}/{}/getRoles".format(service_ip, userservice_port, api_version)
+    url = "http://{}:{}/{}/getRoles".format(userservice_ip, userservice_port, api_version)
 
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']
@@ -146,7 +146,7 @@ def get_roles():
 
 
 def submit_user(user_id, passwordold, passwordnew, username, email, semester, role_id, study_id):
-    url = "http://{}:{}/{}/editUser".format(service_ip, userservice_port, api_version)
+    url = "http://{}:{}/{}/editUser".format(userservice_ip, userservice_port, api_version)
 
     headers_token = headers
     headers_token["Authorization"] = "Bearer " + session['token']

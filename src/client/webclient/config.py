@@ -1,6 +1,7 @@
 from flask import session
 
 service_ip = "localhost"
+userservice_ip = "localhost"
 service_port = "5000"
 userservice_port = "5001"
 
