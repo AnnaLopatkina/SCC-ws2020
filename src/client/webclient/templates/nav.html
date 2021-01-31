@@ -11,11 +11,8 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Fächer</a>
-                </li>
 
-                {% if current_user.is_authenticated %}
+                {% if session['logged_in'] %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -23,14 +20,14 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/myStudy">Meine Fächer</a>
-                        <a class="dropdown-item" href="/myGrades">Meine Noten</a>
+                        <a class="dropdown-item" href="#" aria-disabled="true" disabled>Meine Noten [Nicht verfügbar]</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Noten eintragen</a>
+                        <a class="dropdown-item" href="#" aria-disabled="true" disabled>Noten eintragen [Nicht verfügbar]</a>
                     </div>
                 </li>
                 {% endif %}
 
-                {% if current_user.is_authenticated and current_user.has_role("ADMIN") %}
+                {% if session['logged_in'] and session['is_admin'] %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -46,13 +43,13 @@
                     </li>
                 {% endif %}
 
-                {% if current_user.is_authenticated %}
+                {% if session['logged_in'] %}
                 <li class="nav-item">
                     <a class="nav-link" href="/profile" tabindex="-1" aria-disabled="false">Profil</a>
                 </li>
                 {%  endif %}
 
-                {% if current_user.is_authenticated %}
+                {% if session['logged_in'] %}
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Abmelden</a>
                     </li>
@@ -69,10 +66,10 @@
                     </li>
                 {% endif %}
             </ul>
-            <form class="form-inline my-2 my-lg-0">
+            {#<form class="form-inline my-2 my-lg-0">
                 <input class="form-control mr-sm-2" type="search" placeholder="Mathe" aria-label="Search">
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Fach Suchen</button>
-            </form>
+            </form>#}
         </div>
     </nav>
 </header>

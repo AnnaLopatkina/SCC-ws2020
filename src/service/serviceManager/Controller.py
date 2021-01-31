@@ -4,8 +4,9 @@ import secrets
 from flask import jsonify, request, abort
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
-from serviceManager import app, db, token_password, token_username
+from serviceManager import app, db
 from serviceManager.Token import Token
+from serviceManager.config import token_password, token_username
 from serviceManager.models import Study, Module, Lecture, StudiesModules, ModulesLectures
 
 auth1 = HTTPBasicAuth()
@@ -141,6 +142,7 @@ def update_study():
            methods=['PUT'])  # Was machen wir mit den Attributen, die vielleicht nicht gegeben sind?
 @auth2.login_required()
 def update_module(study_id):
+    print("update module")
     if not request.json:
         abort(400)
 
@@ -148,6 +150,7 @@ def update_module(study_id):
         module = Module(request.json["title"], request.json["short"], request.json["duration"], request.json["credits"],
                         request.json["description"], request.json["responsible"], request.json["teaching"])
     else:
+        print("update existing")
         module = Module.query.filter_by(module_id=request.json["id"]).first()
         module.title = request.json["title"]
         module.short = request.json["short"]

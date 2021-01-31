@@ -1,9 +1,14 @@
-from flask_login import UserMixin
-from flask_sqlalchemy import event
+from sqlalchemy import event
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from webclient import db, loginmanager
-from webclient.config import admin_email, admin_password, admin_username
+from config import admin_username, admin_email, admin_password
+from userService import db
+
+
+class Study(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(300), nullable=False)
+    semesters = db.Column(db.Integer(), primary_key=False)
 
 
 class Role(db.Model):
@@ -20,7 +25,21 @@ class UserRoles(db.Model):
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
 
-class User(UserMixin, db.Model):
+class Token(db.Model):
+    key = db.Column(db.String(99), primary_key=True)
+
+
+class Stoken(db.Model):
+    key = db.Column(db.String(99), primary_key=True)
+
+
+class UserToken(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    token_id = db.Column(db.String(), db.ForeignKey('token.key', ondelete='CASCADE'))
+
+
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(99), nullable=False)
     email = db.Column(db.String(99), unique=True, nullable=False)
@@ -28,7 +47,8 @@ class User(UserMixin, db.Model):
     semester = db.Column(db.Integer(), primary_key=False)
     roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
     study = db.Column(db.Integer, db.ForeignKey('study.id'))
-    api_token = db.Column(db.String(100))
+    token = db.Column(db.String, db.ForeignKey('token.key'))
+    stoken = db.Column(db.String, db.ForeignKey('stoken.key'))
 
     def __init__(self, username, email):
         self.username = username
@@ -83,7 +103,7 @@ class User(UserMixin, db.Model):
 
     @classmethod
     def users_full(cls):
-        return User.query.join(Study).all()
+        return User.query.join(Role).all()
 
 
 @event.listens_for(User.__table__, 'after_create')
@@ -118,8 +138,3 @@ def admin_role(*args, **kwargs):
 
     db.session.add(admin)
     db.session.commit()
-
-
-@loginmanager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)

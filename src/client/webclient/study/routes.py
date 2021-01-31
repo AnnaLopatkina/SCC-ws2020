@@ -1,19 +1,15 @@
 import requests
 from flask import render_template, redirect, url_for
-from flask_login import current_user, login_required
-from requests.auth import HTTPBasicAuth
 
-from webclient import app, db
+from webclient import app
 from webclient.config import *
 from webclient.study.forms import StudyForm, ModuleForm, LectureForm
-from webclient.study.models import Study
-from webclient.study.studymanagement import getstudies, getstudy
-from webclient.user.models import User
-from webclient.user.usermanagement import login_required_and_roles
+from webclient.study.studymanagement import getstudies, getstudy, update_module, update_lecture
+from webclient.user.usermanagement import admin_required, check_login, getUser
 
 
 @app.route("/studiesAdmin")
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_admin():
     r = getstudies()
     print(r.json()['studies'])
@@ -21,14 +17,12 @@ def studies_admin():
 
 
 @app.route("/editStudy/<int:studyid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_edit_admin(studyid):
-    if current_user.api_token == '':
+    if session['studyapi_token'] == '':
         return redirect(url_for("get_api_token"))
 
     r = getstudies()
-
-    study = Study()
 
     for a in r.json()['studies']:
         if a['id'] == studyid:
@@ -41,7 +35,7 @@ def studies_edit_admin(studyid):
 
 
 @app.route("/editStudy/<int:studyid>", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_edit_admin_post(studyid):
     form = StudyForm()
 
@@ -57,7 +51,7 @@ def studies_edit_admin_post(studyid):
         url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
 
         headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
+        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
 
         r = requests.put(url=url, headers=headers_token, json=study)
         if r.status_code != 200:
@@ -67,9 +61,9 @@ def studies_edit_admin_post(studyid):
 
 
 @app.route("/addStudy", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_add_admin():
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     form = StudyForm()
@@ -77,7 +71,7 @@ def studies_add_admin():
 
 
 @app.route("/addStudy", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def studies_save_admin():
     form = StudyForm()
 
@@ -94,7 +88,7 @@ def studies_save_admin():
         url = "http://{}:{}/{}/study".format(service_ip, service_port, api_version)
 
         headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
+        headers_token["Authorization"] = "Bearer " + session['studyapi_token']
 
         r = requests.put(url=url, headers=headers_token, json=study)
 
@@ -104,35 +98,35 @@ def studies_save_admin():
     return redirect(url_for('studies_admin'))
 
 
-@app.route("/myGrades", methods=['GET'])
-@login_required
-def mygrades():
-    data = db.session.query(Grade).filter(User.id == current_user.id)
-
-    if data is None:
-        return render_template("myGrades.html", error=True)
-
-    return render_template("myGrades.html", user=current_user)
+# @app.route("/myGrades", methods=['GET'])
+# @check_login
+# def mygrades():
+#     data = db.session.query(Grade).filter(User.id == current_user.id)
+#
+#     if data is None:
+#         return render_template("myGrades.html", error=True)
+#
+#     return render_template("myGrades.html", user=current_user)
 
 
 @app.route("/myStudy", methods=['GET'])
-@login_required
+@check_login
 def mystudy():
-    data = db.session.query(Study).join(User).filter(User.email == current_user.email).first()
+    user = getUser(session['id'])
 
-    if data is None:
+    if user.json()['study_id'] is None or '':
         return render_template("mystudy.html", error=True)
 
-    r = getstudy(data.id)
+    r = getstudy(user.json()['study_id'])
     print(r.json())
 
-    return render_template("mystudy.html", study=r.json(), user=current_user)
+    return render_template("mystudy.html", study=r.json(), user=user.json())
 
 
 @app.route("/study/<int:studyid>/addModule", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_module(studyid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -142,7 +136,7 @@ def add_module(studyid):
 
 
 @app.route("/study/<int:studyid>/addModule", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_module_post(studyid):
     form = ModuleForm()
 
@@ -165,14 +159,7 @@ def add_module_post(studyid):
         # add api put request here
         print(module)
 
-        url = "http://{}:{}/{}/study/{}/module".format(service_ip, service_port, api_version, studyid)
-        headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
-
-        r = requests.put(url=url, headers=headers_token, json=module)
-
-        if r.status_code != 200:
-            print("request failed with status: {}".format(r.status_code))
+        update_module(studyid, module)
 
         return redirect(url_for('study_admin', studyid=studyid))
 
@@ -181,9 +168,9 @@ def add_module_post(studyid):
 
 
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_module(studyid, moduleid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -209,13 +196,14 @@ def edit_module(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>/editModule/<int:moduleid>", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_module_post(studyid, moduleid):
     form = ModuleForm()
     study = getstudy(studyid)
 
     if form.validate_on_submit():
         module = {
+            "id": moduleid,
             "title": form.title.data,
             "short": form.short.data,
             "description": form.description.data,
@@ -227,7 +215,7 @@ def edit_module_post(studyid, moduleid):
 
         print(module)
 
-        # add api put request here
+        update_module(studyid, module)
 
         return redirect(url_for('studies_admin'))
 
@@ -235,7 +223,7 @@ def edit_module_post(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>")
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def study_admin(studyid):
     study = getstudy(studyid)
     json = study.json()
@@ -245,9 +233,9 @@ def study_admin(studyid):
 # Lehrveranstaltungen verwalten
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_lecture(studyid, moduleid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -257,7 +245,7 @@ def add_lecture(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/addlecture", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def add_lecture_post(studyid, moduleid):
     form = LectureForm()
     study = getstudy(studyid)
@@ -278,15 +266,7 @@ def add_lecture_post(studyid, moduleid):
 
         print(lecture)
 
-        url = "http://{}:{}/{}/study/{}/module/{}/lecture".format(service_ip, service_port, api_version, studyid,
-                                                                  moduleid)
-
-        headers_token = headers
-        headers_token["Authorization"] = "Bearer " + current_user.api_token
-
-        r = requests.put(url=url, headers=headers_token, json=lecture)
-        if r.status_code != 200:
-            print("request failed with status: {}".format(r.status_code))
+        update_lecture(studyid, moduleid, lecture)
 
         return redirect(url_for('study_admin', studyid=studyid))
 
@@ -294,9 +274,9 @@ def add_lecture_post(studyid, moduleid):
 
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['GET'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_lecture(studyid, moduleid, lectureid):
-    if current_user.api_token is None:
+    if session['studyapi_token'] is None:
         return redirect(url_for("get_api_token"))
 
     study = getstudy(studyid)
@@ -322,7 +302,7 @@ def edit_lecture(studyid, moduleid, lectureid):
 
 
 @app.route("/study/<int:studyid>/module/<int:moduleid>/editLecture/<int:lectureid>", methods=['POST'])
-@login_required_and_roles(role="ADMIN")
+@admin_required
 def edit_lecture_post(studyid, moduleid, lectureid):
     form = LectureForm()
     study = getstudy(studyid)
@@ -340,7 +320,7 @@ def edit_lecture_post(studyid, moduleid, lectureid):
 
         print(lecture)
 
-        # add api put request here
+        update_lecture(studyid, moduleid, lecture)
 
         return redirect(url_for('study_admin', studyid=studyid))
 
