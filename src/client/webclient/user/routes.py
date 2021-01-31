@@ -71,7 +71,7 @@ def register_post():
     if form.validate_on_submit():
         response = register_user(form.name.data, form.email.data, form.password.data)
 
-        if response.status_code == 500:
+        if response.status_code == 400:
             for error in response.json()['errors']:
                 if error['error'] == 'email':
                     form.email.errors.append("Diese E-Mail kann nicht verwendet werden!")
@@ -100,7 +100,7 @@ def profileedit():
         response = submit_user(form.user_id.data, form.passwordold.data, form.password.data, form.name.data,
                                form.email.data, form.semester.data, form.roles.data, form.studies.data)
 
-        if response.status_code == 500:
+        if response.status_code == 400:
             for error in response.json()['errors']:
                 if error['error'] == 'password':
                     form.passwordold.errors.append("Passwort stimmt nicht!")
@@ -189,7 +189,7 @@ def edit_user_post(userid):
         response = submit_user(form.user_id.data, form.passwordold.data, form.password.data, form.name.data,
                                form.email.data, form.semester.data, form.roles.data, form.studies.data)
 
-        if response.status_code == 500:
+        if response.status_code == 400:
             for error in response.json()['errors']:
                 if error['error'] == 'password':
                     form.passwordold.errors.append("Passwort stimmt nicht!")
