@@ -1,0 +1,40 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Benutzer</h1>
+            <p><a class="btn btn-default" href="/register" role="button">Neu</a></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+
+            {% for user in users %}
+                <div class="col-md-12">
+                    <a class="btn col-md-12 border" role="button" data-toggle="collapse" href="#toggle{{ user.id }}"
+                       aria-expanded="false" aria-controls="toggle{{ user['id'] }}">
+                        <p class="float-left">{{ user.id2 }}</p>
+                        <p class="float-right">{{ user.email }}<br>
+                            Rollen:
+                            {% for role in user.roles %}
+                                <i>{{ role.name }} </i>
+                            {% endfor %}
+
+                        </p>
+                        <h2>{{ user.username }}</h2>
+                    </a>
+                    <div class="collapse" id="toggle{{ user.id }}">
+                        <div class="card card-body">
+                            {% if user.semester is not none %}
+                                {{ user.study_id }}, Semester: {{ user.semester }}
+                            {% endif %}
+                            <a class="btn btn-default" href="/editUser/{{ user.id }}">Edit</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

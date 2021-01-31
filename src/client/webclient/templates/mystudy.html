@@ -1,0 +1,54 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+
+    {% if error %}
+        <div class="jumbotron">
+            <div class="container">
+                <h2>Bitte lege zuerst deinen Studiengang und Semester fest:</h2>
+            </div>
+            <a class="btn btn-info" href="/profile">Profil bearbeiten</a>
+        </div>
+    {% endif %}
+
+    {% if not error %}
+
+        <div class="jumbotron">
+            <div class="container">
+                <h1>Mein Studium</h1>
+                <p>{{ study["study"].title }} <br>
+                    {{ user['semester'] }}. Semester</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+
+                {% for module in study["study"]["modules"] %}
+                    <div class="col-md-12 m-2">
+                        <a class="btn col-md-12 border" role="button" data-toggle="collapse"
+                           href="#toggle{{ module.id }}" aria-expanded="false" aria-controls="toggle{{ module.id }}">
+                            <p class="float-left">{{ module.id }}</p>
+                            <p class="float-right">{{ module.id }}</p>
+                            <h2>{{ module.title }}</h2>
+                        </a>
+                        <div class="collapse" id="toggle{{ module.id }}">
+                            <div class="card card-body">
+                                {% for lecture in module["lectures"] %}
+                                    <div class="col-md-12 border card p-1 m-1">
+                                        <h4>{{ lecture.title }}</h4>
+                                        <p>Semester: {{ lecture.semester }} <br>
+                                            Verantwortlich: {{ lecture.responsible }}
+                                        </p>
+                                        <a class="btn btn-info" href="/study/{{ study["study"].id }}/module/{{ module.id }}/editLecture/{{ lecture.id }}/addGrade">Note eintragen</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
