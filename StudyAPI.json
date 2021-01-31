@@ -1,0 +1,419 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Study",
+    "description": "Verwaltet Study",
+    "contact": {
+      "email": "you@your-company.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/WS2020-Gruppe10/StudyAPI/1.0.0",
+      "description": "StudyAPI"
+    }
+  ],
+  "tags": [
+    {
+      "name": "admins",
+      "description": "Secured Admin-only calls"
+    },
+    {
+      "name": "users",
+      "description": "Operations available to regular users"
+    }
+  ],
+  "paths": {
+    "/api/getToken": {
+      "get": {
+        "tags": [
+          "tocken"
+        ],
+        "summary": "get all studies",
+        "operationId": "getTocken",
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "bad input"
+          }
+        }
+      }
+    },
+    "/studies": {
+      "get": {
+        "tags": [
+          "studies"
+        ],
+        "summary": "get all studies",
+        "description": "all studies will be shown\n",
+        "operationId": "getStudies",
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{studyId}": {
+      "get": {
+        "tags": [
+          "study"
+        ],
+        "summary": "Returns a study by ID",
+        "description": "get study by id\n",
+        "parameters": [
+          {
+            "name": "studyId",
+            "in": "path",
+            "description": "Study Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study": {
+      "put": {
+        "tags": [
+          "study"
+        ],
+        "summary": "update study",
+        "description": "Study will be updated\n",
+        "operationId": "updateStudy",
+        "responses": {
+          "200": {
+            "description": "success message / successful registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{studyId}/module": {
+      "put": {
+        "tags": [
+          "study"
+        ],
+        "summary": "update module",
+        "description": "module with new parameters will be updated and in related study saved\n",
+        "operationId": "updateModule",
+        "parameters": [
+          {
+            "name": "studyId",
+            "in": "path",
+            "description": "id of a Study that has a module",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message / successful update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/{studyId}/module/{moduleId}/lecture": {
+      "put": {
+        "tags": [
+          "lecture"
+        ],
+        "summary": "update of single Lecture",
+        "description": "lecture with new parameters will be updated and in related module and study saved\n",
+        "operationId": "updateLecture",
+        "parameters": [
+          {
+            "name": "studyId",
+            "in": "path",
+            "description": "id of a Study that has a module",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "moduleId",
+            "in": "path",
+            "description": "id of a Module that has a lecture",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message / successful lecture update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Study": {
+        "required": [
+          "degree",
+          "description",
+          "id",
+          "modules",
+          "semesters",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "semester": {
+            "type": "integer"
+          },
+          "degree": {
+            "type": "string"
+          },
+          "modules": {
+            "$ref": "#/components/schemas/Module"
+          }
+        }
+      },
+      "Module": {
+        "required": [
+          "credits",
+          "description",
+          "duration",
+          "id",
+          "lectures",
+          "responsible",
+          "short",
+          "teaching",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "integer"
+          },
+          "credits": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "responsible": {
+            "type": "string"
+          },
+          "teaching": {
+            "type": "string"
+          },
+          "lectures": {
+            "$ref": "#/components/schemas/Lecture"
+          }
+        }
+      },
+      "Lecture": {
+        "required": [
+          "description",
+          "id",
+          "responsible",
+          "semester",
+          "short",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "semester": {
+            "type": "integer"
+          },
+          "responsible": {
+            "type": "string"
+          }
+        }
+      },
+      "DefaultSuccess": {
+        "required": [
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "success should be true"
+          }
+        }
+      },
+      "DefaultError": {
+        "required": [
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "description": "list of all occuring errors",
+            "items": {
+              "$ref": "#/components/schemas/DefaultError_errors"
+            }
+          }
+        }
+      },
+      "DefaultError_errors": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "description": "single error"
+      }
+    }
+  }
+}

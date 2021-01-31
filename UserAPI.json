@@ -1,0 +1,605 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "UserAPI",
+    "description": "Verwaltet Nutzer (rollenbasiert)",
+    "contact": {
+      "email": "you@your-company.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/WS2020-Gruppe10/UserAPI/1.0.0",
+      "description": "UserAPI"
+    }
+  ],
+  "tags": [
+    {
+      "name": "admins",
+      "description": "Secured Admin-only calls"
+    },
+    {
+      "name": "users",
+      "description": "Operations available to regular users"
+    },
+    {
+      "name": "anyone",
+      "description": "Can be accessed by anyone sending a request"
+    }
+  ],
+  "paths": {
+    "/registerUser": {
+      "put": {
+        "tags": [
+          "users",
+          "admins",
+          "anyone"
+        ],
+        "summary": "registers user and save",
+        "description": "Valid users are saved and API token are generated for them\n",
+        "operationId": "registerUser",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Username",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "users mail address",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "description": "new password for user",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message / successful registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / bad input / no json request / no user with this email address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/loginToken": {
+      "post": {
+        "tags": [
+          "users",
+          "admins",
+          "anyone"
+        ],
+        "summary": "create token",
+        "description": "if the user inputs the right password, loginToken returns either the existing token or creates a new one",
+        "operationId": "loginToken",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "users mail address",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "description": "input password of the user",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTokenCombination"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json request / bad input / no user with this email / wrong password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{userID}": {
+      "get": {
+        "tags": [
+          "admins"
+        ],
+        "summary": "get user",
+        "description": "get user by id",
+        "operationId": "user",
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "path",
+            "description": "UserId of User to get",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad input / no user with this userID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getRoles": {
+      "get": {
+        "tags": [
+          "users",
+          "admins"
+        ],
+        "summary": "get roles",
+        "description": "get all roles",
+        "operationId": "getRoles",
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/editUser": {
+      "put": {
+        "tags": [
+          "users",
+          "admins"
+        ],
+        "summary": "update user",
+        "description": "User will be updated in all properties that got changed",
+        "operationId": "editUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "id of user to be edited",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "passwordold",
+            "in": "query",
+            "description": "old password of the user",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "passwordnew",
+            "in": "query",
+            "description": "new password of the user",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "description": "Name of the user to be edited",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "semester",
+            "in": "query",
+            "description": "semester of user to be edited",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "study",
+            "in": "query",
+            "description": "study of user to be edited",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "description": "dont know"
+              }
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "description": "new role of the user, is only changed, if it's the admin who is trying to do it",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json request / wrong old password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "admins"
+        ],
+        "summary": "get users",
+        "description": "get a list of all users",
+        "operationId": "users",
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setStudyToken/{userID}": {
+      "put": {
+        "tags": [
+          "admins"
+        ],
+        "summary": "set study token",
+        "description": "Set study token for admin",
+        "operationId": "setStudyToken",
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "path",
+            "description": "id of the admin to set the token for",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "study_token",
+            "in": "query",
+            "description": "token to be set for the admin",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addRole": {
+      "put": {
+        "tags": [
+          "admins"
+        ],
+        "summary": "add role",
+        "description": "add a new role to the list of possible roles",
+        "operationId": "addRole",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of the role to be added",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request / no json request / bad input / role already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "required": [
+          "id",
+          "roles",
+          "study_id",
+          "study_title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "semester": {
+            "type": "integer"
+          },
+          "roles": {
+            "type": "array",
+            "description": "list of all roles this user has",
+            "items": {
+              "$ref": "#/components/schemas/inline_response_200"
+            }
+          },
+          "study_id": {
+            "type": "integer"
+          },
+          "study_title": {
+            "type": "string"
+          }
+        }
+      },
+      "UserTokenCombination": {
+        "required": [
+          "id",
+          "is_admin",
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "id of the user, the token belongs to"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "description": "states is user is admin"
+          },
+          "token": {
+            "type": "string",
+            "description": "login-token of the given user"
+          },
+          "stoken": {
+            "type": "string",
+            "description": "study-token of the given user"
+          }
+        }
+      },
+      "Study": {
+        "required": [
+          "id",
+          "semesters",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Bachelor Informatik"
+          },
+          "semesters": {
+            "type": "integer"
+          }
+        }
+      },
+      "DefaultSuccess": {
+        "required": [
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "success should be true"
+          }
+        }
+      },
+      "DefaultError": {
+        "required": [
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "description": "list of all occuring errors",
+            "items": {
+              "$ref": "#/components/schemas/DefaultError_errors"
+            }
+          }
+        }
+      },
+      "inline_response_200": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "name of the role"
+          }
+        },
+        "description": "single role"
+      },
+      "DefaultError_errors": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "description": "single error"
+      }
+    }
+  }
+}
