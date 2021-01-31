@@ -22,8 +22,10 @@ Link-zum-Wiki
 ## Dokumentation
 
 [Dokumentation](https://bitbucket.org/tudresden/ws2020-gruppe10/doku.pdf)
-[Study Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/output-study.pdf)
-[User Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/output-user.pdf)
+
+[Study Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/src/master/output-study.pdf)
+
+[User Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/src/master/output-user.pdf)
 
 ---
 
