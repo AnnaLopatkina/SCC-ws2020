@@ -21,16 +21,12 @@ Link-zum-Wiki
 
 ## Dokumentation
 
-[Wiki](https://bitbucket.org/tudresden/ws2020-gruppe10/wiki/Home)
+[Dokumentation](https://bitbucket.org/tudresden/ws2020-gruppe10/doku.pdf)
+[Study Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/output-study.pdf)
+[User Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/output-user.pdf)
 
 ---
 
-## Voraussetzungen
-
-python:
-
-flask
-
-## How to run
+## How to run client in docker with certs
 
 Docker client: docker run -d --network rest-net --name webclient -p 443:443 --mount type=bind,source=/home/debian/certs,target=/certs fwao/webclient
