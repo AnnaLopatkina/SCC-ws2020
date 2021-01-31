@@ -12,13 +12,6 @@ Fabian Wolf @FWao
 
 ---
 
-## Kurzbeschreibung
-
-
-Link-zum-Wiki
-
----
-
 ## Dokumentation
 
 [Dokumentation](https://bitbucket.org/tudresden/ws2020-gruppe10/doku.pdf)
