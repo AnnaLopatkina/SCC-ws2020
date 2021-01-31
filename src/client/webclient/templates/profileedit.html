@@ -193,6 +193,18 @@
                                 {% endfor %}
                             </div>
 
+                            {% if session['is_admin'] %}
+                                <hr class="my-4">
+                                <h5> StudyAPI Token </h5>
+                                <br>
+                                {% if session['studyapi_token'] == '' %}
+                                    <p>Kein Zugriffstoken vorhanden.</p>
+                                {% else %}
+                                    <p>Zugriffstoken vorhanden.</p>
+                                {% endif %}
+                                <p><a href="/apiToken">Neues Token anfordern</a></p>
+                            {% endif %}
+
                             <hr class="my-4">
 
                             <h5>Mein Studium</h5>
