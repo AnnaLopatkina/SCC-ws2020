@@ -9,11 +9,10 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
                                         'sqlite:///' + os.path.join(basedir, 'app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'secretKey'
+app.config['SECRET_KEY'] = 'rgnzhztjbhtgvtragfred'
 db = SQLAlchemy(app)
 
-token_username = "admin"
-token_password = "superadmin"
+
 
 import serviceManager.Controller
 

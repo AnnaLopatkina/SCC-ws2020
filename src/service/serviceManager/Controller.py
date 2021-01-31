@@ -4,8 +4,9 @@ import secrets
 from flask import jsonify, request, abort
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
-from serviceManager import app, db, token_password, token_username
+from serviceManager import app, db
 from serviceManager.Token import Token
+from serviceManager.config import token_password, token_username
 from serviceManager.models import Study, Module, Lecture, StudiesModules, ModulesLectures
 
 auth1 = HTTPBasicAuth()
