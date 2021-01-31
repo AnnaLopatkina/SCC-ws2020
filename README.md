@@ -14,7 +14,7 @@ Fabian Wolf @FWao
 
 ## Dokumentation
 
-[Dokumentation](https://bitbucket.org/tudresden/ws2020-gruppe10/doku.pdf)
+[Dokumentation](https://bitbucket.org/tudresden/ws2020-gruppe10/src/master/doku.pdf)
 
 [Study Service API](https://bitbucket.org/tudresden/ws2020-gruppe10/src/master/output-study.pdf)
 
